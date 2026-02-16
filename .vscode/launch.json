@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "bun",
+      "request": "launch",
+      "name": "Debug Stream Vote",
+      "program": "${workspaceFolder}/src/server.ts",
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": false,
+      "watchMode": false,
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "bun",
+      "request": "launch",
+      "name": "Debug Current File",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": false,
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "bun",
+      "request": "launch",
+      "name": "Debug Tests",
+      "program": "${workspaceFolder}/src/polls/poll.service.test.ts",
+      "cwd": "${workspaceFolder}",
+      "stopOnEntry": false,
+      "console": "integratedTerminal"
+    }
+  ]
+}
