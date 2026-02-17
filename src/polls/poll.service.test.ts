@@ -35,11 +35,20 @@ describe("Poll Service", () => {
 
     const poll = pollService.createPoll("Cor?", ["Azul", "Verde", "Vermelho"])
 
-    const updatedPoll = pollService.vote(poll.id, 0);
-    pollService.vote(poll.id, 1);
+    const updatedPoll = pollService.vote(poll.id, "1", 0,);
+    pollService.vote(poll.id,"2", 1);
 
     expect(updatedPoll.options[0]?.votes).toBe(1);
     expect(updatedPoll.options[1]?.votes).toBe(1);
     expect(updatedPoll.options[2]?.votes).toBe(0);
+  })
+
+  test("Deve barrar mesmo usuário votar duas vezes", () => {
+    const poll = pollService.createPoll("Cor?", ["Azul", "Amarelo", "Branco"]);
+    const userId = "abc1";
+
+    const updatedPoll = pollService.vote(poll.id, userId, 1);
+
+    expect(() => pollService.vote(poll.id, userId, 2)).toThrow("Usuário já votou para essa enquete.")
   })
 })

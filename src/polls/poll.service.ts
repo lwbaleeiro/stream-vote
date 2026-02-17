@@ -33,7 +33,7 @@ class PollService {
     return poll;
   }
 
-  vote(pollId: string, optionIndex: number) {
+  vote(pollId: string, userId: string, optionIndex: number) {
     if (!pollId) throw new Error("Parametro pollId deve ser informado");
     if (optionIndex === undefined || optionIndex === null) throw new Error("Parametro optionIndex deve ser informado");
 
@@ -41,7 +41,9 @@ class PollService {
 
     if (!poll) throw new Error("Enquete não encontrada")
     if (!poll.options[optionIndex]) throw new Error("Opção ded voto invalida.")
+    if (pollStore.hasVoted(pollId, userId)) throw new Error("Usuário já votou para essa enquete.");
 
+    pollStore.registreVote(pollId, userId);
     poll.options[optionIndex].votes++;
 
     pollStore.save(poll);
@@ -49,9 +51,7 @@ class PollService {
   }
 
   getPolls() {
-
     const activePollsList = pollStore.getAll().filter(poll => poll.isActive === true);
-
     return activePollsList;
   }
 }

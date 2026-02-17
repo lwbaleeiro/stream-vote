@@ -1,10 +1,10 @@
-import { wsHandler } from "./ws/handler";
+import { wsHandler, type WsData } from "./ws/handler";
 
 const server = Bun.serve({
     port: 3000,
     fetch(request, server) {
 
-        if (server.upgrade(request)) {
+        if (server.upgrade(request, { data: { userId: crypto.randomUUID() } })) {
             return;
         }
 

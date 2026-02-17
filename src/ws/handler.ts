@@ -2,9 +2,13 @@ import type { WebSocketHandler } from "bun";
 import { pollService } from "../polls/poll.service";
 import { validateCreatePoll, validateVote } from "../validators/poll.validator";
 
-export const wsHandler: WebSocketHandler<any> = {
+export interface WsData {
+  userId: string;
+}
+
+export const wsHandler: WebSocketHandler<WsData> = {
   open(ws) {
-    console.log("Novo cliente conectado!");
+    console.log("Novo cliente conectado:", ws.data.userId);
 
     ws.subscribe("general");
   },
@@ -25,7 +29,8 @@ export const wsHandler: WebSocketHandler<any> = {
           break;
         case "VOTE":
           const validVoteData = validateVote(payload.data);
-          const updatedPoll = pollService.vote(validVoteData.pollId, validVoteData.optionIndex);
+
+          const updatedPoll = pollService.vote(validVoteData.pollId, ws.data.userId, validVoteData.optionIndex);
 
           ws.publish("general", JSON.stringify({ type: "POLL_UPDATED", data: updatedPoll }));
           ws.send(JSON.stringify({ type: "POLL_UPDATED", data: updatedPoll }));
