@@ -18,7 +18,6 @@ ws.addEventListener("open", () => {
     statusEl.querySelector(".status-text").textContent = "Conectado";
     showToast("Conectado ao servidor!", "success");
 
-    // Pede a lista de enquetes ao conectar
     ws.send(JSON.stringify({ type: "GET_POLLS" }));
 });
 

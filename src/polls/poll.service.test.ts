@@ -35,8 +35,8 @@ describe("Poll Service", () => {
 
     const poll = pollService.createPoll("Cor?", ["Azul", "Verde", "Vermelho"])
 
-    const updatedPoll = pollService.vote(poll.id, "1", 0,);
-    pollService.vote(poll.id,"2", 1);
+    pollService.vote(poll.id, "1", 0,);
+    const updatedPoll = pollService.vote(poll.id,"2", 1);
 
     expect(updatedPoll.options[0]?.votes).toBe(1);
     expect(updatedPoll.options[1]?.votes).toBe(1);
