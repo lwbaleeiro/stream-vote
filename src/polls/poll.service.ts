@@ -47,6 +47,13 @@ class PollService {
     pollStore.save(poll);
     return poll;
   }
+
+  getPolls() {
+
+    const activePollsList = pollStore.getAll().filter(poll => poll.isActive === true);
+
+    return activePollsList;
+  }
 }
 
 export const pollService = new PollService();

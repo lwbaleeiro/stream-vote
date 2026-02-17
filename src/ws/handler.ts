@@ -1,5 +1,6 @@
 import type { WebSocketHandler } from "bun";
 import { pollService } from "../polls/poll.service";
+import { validateCreatePoll, validateVote } from "../validators/poll.validator";
 
 export const wsHandler: WebSocketHandler<any> = {
   open(ws) {
@@ -14,7 +15,8 @@ export const wsHandler: WebSocketHandler<any> = {
 
       switch (payload.type) {
         case "CREATE_POLL":
-          const newPoll = pollService.createPoll(payload.data.title, payload.data.options);
+        const validData = validateCreatePoll(payload.data);
+        const newPoll = pollService.createPoll(validData.title, validData.options);
 
           ws.send(JSON.stringify({ type: "POLL_CREATED", data: newPoll }));
           ws.publish("general", JSON.stringify({ type: "POLL_CREATED", data: newPoll }));
@@ -22,17 +24,20 @@ export const wsHandler: WebSocketHandler<any> = {
           console.log("Enquete criada:", newPoll);
           break;
         case "VOTE":
-          console.log(" >> case vote payload: ", payload);
-
-          const updatedPoll = pollService.vote(payload.data.pollId, payload.data.optionsIndex);
-          console.log("updatedPoll: ", updatedPoll);
+          const validVoteData = validateVote(payload.data);
+          const updatedPoll = pollService.vote(validVoteData.pollId, validVoteData.optionIndex);
 
           ws.publish("general", JSON.stringify({ type: "POLL_UPDATED", data: updatedPoll }));
-          console.log("published")
           ws.send(JSON.stringify({ type: "POLL_UPDATED", data: updatedPoll }));
-          console.log("send")
 
           console.log("Voto computado para a enquete: ", updatedPoll.title);
+          break;
+        case "GET_POLLS":
+          const pollsList = pollService.getPolls();
+
+         ws.send(JSON.stringify({ type: "POLLS_LIST", data: pollsList }));
+
+          console.log("Retornado list de polls ativas.");
           break;
         default:
           console.log("Tipo de mensagem desconhecido:", payload.type);
