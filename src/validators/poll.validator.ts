@@ -1,6 +1,8 @@
 export function validateCreatePoll(data: any): { title: string; options: string[] } {
     
     if (!data) throw new Error("Dados não fornecidos.");
+
+    if (!Array.isArray(data.options)) throw new Error("options deve ser do tipo 'Array'");
     if (data.options.length < 2) throw new Error("data.options tem que ter 2 itens.");
 
     if (typeof data.title !== "string" || data.title.trim() == "") throw new Error("title é obrigatório e deve ser do tipo 'string'");

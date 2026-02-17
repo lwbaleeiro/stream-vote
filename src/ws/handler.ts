@@ -44,7 +44,8 @@ export const wsHandler: WebSocketHandler<any> = {
           break;
       }
     } catch (error) {
-      ws.send(JSON.stringify({ type: "ERROR", message: "Invalid JSON Format" }));
+      const msg = error instanceof Error ? error.message : "Erro desconhecido";
+      ws.send(JSON.stringify({ type: "ERROR", data: { message: msg} }));
     }
 
   },
