@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stream Vote — Enquetes em Tempo Real</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <h1>🗳️ Stream Vote</h1>
+        <div class="connection-status" id="connectionStatus">
+          <span class="status-dot"></span>
+          <span class="status-text">Desconectado</span>
+        </div>
+      </header>
+
+      <main class="main">
+        <!-- Criar Enquete -->
+        <section class="card create-section">
+          <h2>Criar Nova Enquete</h2>
+          <form id="createPollForm">
+            <div class="form-group">
+              <label for="pollTitle">Título da Enquete</label>
+              <input
+                type="text"
+                id="pollTitle"
+                placeholder="Ex: Qual a melhor linguagem?"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>Opções</label>
+              <div id="optionsContainer">
+                <input
+                  type="text"
+                  class="option-input"
+                  placeholder="Opção 1"
+                  required
+                />
+                <input
+                  type="text"
+                  class="option-input"
+                  placeholder="Opção 2"
+                  required
+                />
+              </div>
+              <button type="button" class="btn btn-secondary" id="addOptionBtn">
+                + Adicionar Opção
+              </button>
+            </div>
+            <button type="submit" class="btn btn-primary">Criar Enquete</button>
+          </form>
+        </section>
+
+        <!-- Lista de Enquetes -->
+        <section class="card polls-section">
+          <div class="polls-header">
+            <h2>Enquetes Ativas</h2>
+            <button class="btn btn-ghost" id="refreshBtn">↻ Atualizar</button>
+          </div>
+          <div id="pollsList" class="polls-list">
+            <p class="empty-state">Nenhuma enquete ativa. Crie uma acima! 🚀</p>
+          </div>
+        </section>
+      </main>
+
+      <!-- Toast de notificações -->
+      <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
