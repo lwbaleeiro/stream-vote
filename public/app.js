@@ -109,7 +109,7 @@ function vote(pollId, optionIndex) {
 // ===== Render =====
 function renderPolls() {
     if (polls.size === 0) {
-        pollsList.innerHTML = '<p class="empty-state">Nenhuma enquete ativa. Crie uma acima! 🚀</p>';
+        pollsList.innerHTML = '<p class="empty-state">Nenhuma enquete ativa. Crie uma acima!</p>';
         return;
     }
 

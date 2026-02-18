@@ -1,37 +1,54 @@
 import type { Poll } from "./poll.model";
-import { db } from "../database";
+import { db } from "../db/index.ts";
+import { eq, and} from "drizzle-orm"
+import * as schema from "../db/schemas";
 
 class PollStore {
 
-    save(poll: Poll): void {
-        
-        const saveTransaction = db.transaction((p: Poll) => {
-            db.run(`INSERT OR REPLACE INTO polls (id, title, createdAt, isActive) VALUES (?, ?, ?, ?)`, 
-                [poll.id, poll.title, poll.createdAt.toISOString(), poll.isActive ? 1 : 0]
-            );
+    async save(poll: Poll): Promise<void> {
 
-            poll.options.forEach(
-                opt => db.run(`INSERT OR REPLACE INTO options (pollId, idx, text, votes) VALUES (?, ?, ?, ?)`, 
-                [poll.id, opt.index, opt.text, opt.votes])
-            );
-        });
+        db.insert(schema.polls).values({ 
+            id: poll.id, 
+            title: poll.title, 
+            createdAt: poll.createdAt.toISOString(), 
+            isActive: poll.isActive
+        }).onConflictDoUpdate({ 
+            target: schema.polls.id, 
+            set: { isActive: poll.isActive, title: poll.title } 
+        }).run();
 
-        saveTransaction(poll);
+        poll.options.forEach(
+            opt => db.insert(schema.options).values({ 
+                pollId: poll.id, 
+                idx: opt.index, 
+                text: opt.text, 
+                votes: opt.votes 
+            }).onConflictDoUpdate({
+                target: [schema.options.pollId, schema.options.idx],
+                set: { votes: opt.votes }
+            })
+            .run()
+        );
     }
 
-    getById(id: string): Poll | undefined {
-        const pollRow = db.query("SELECT * FROM polls WHERE id = ?").get(id) as any;
-        
-        if (!pollRow) return undefined;
+    async getById(id: string): Promise<Poll | undefined> {
 
-        const optionsRow = db.query("SELECT * FROM options WHERE pollId = ? ORDER BY idx").all(id) as any[];
-        
+        const result = db.select()
+            .from(schema.polls)
+            .where(eq(schema.polls.id, id))
+            .get();
+
+        if (!result) return undefined;
+
+        const optionsRows = db.select()
+            .from(schema.options)
+            .where(eq(schema.options.pollId, id))
+            .all()
+
         return {
-            id: pollRow.id,
-            title: pollRow.title,
-            createdAt: new Date(pollRow.createdAt),
-            isActive: pollRow.isActive === 1,
-            options: optionsRow.map(opt => ({
+            ...result,
+            createdAt: new Date(result.createdAt),
+            options: optionsRows.map(opt => ({
                 index: opt.idx,
                 text: opt.text,
                 votes: opt.votes
@@ -39,18 +56,23 @@ class PollStore {
         };
     }
 
-    getAll(): Poll[] {
+    async getAll(): Promise<Poll[]> {
 
-        const pollRows = db.query("SELECT * FROM polls").all() as any[];
+        const pollRows = db.select()
+            .from(schema.polls)
+            .all();
 
         return pollRows.map(row => {
-            const optionsRows = db.query("SELECT * FROM options WHERE pollId = ? ORDER BY idx").all(row.id) as any[];
+            const optionsRows = db.select()
+                .from(schema.options)
+                .where(eq(schema.options.pollId, row.id))
+                .all()
             
             return {
                 id: row.id,
                 title: row.title,
                 createdAt: new Date(row.createdAt),
-                isActive: row.isActive === 1,
+                isActive: row.isActive,
                 options: optionsRows.map(opt => ({
                     index: opt.idx,
                     text: opt.text,
@@ -61,21 +83,23 @@ class PollStore {
     }
 
     clear(): void {
-        db.exec(`
-            DELETE FROM votes;
-            DELETE FROM options;
-            DELETE FROM polls;
-        `);
+        db.delete(schema.polls).run();
+        db.delete(schema.options).run();
+        db.delete(schema.votes).run();
     }
 
-    registreVote(pollId: string, userId: string): void {
+    async registreVote(pollId: string, userId: string): Promise<void> {
 
-        db.run(`INSERT INTO votes (pollId, userId) VALUES (?, ?)`, [pollId, userId]);
+        db.insert(schema.votes).values({ pollId: pollId, userId: userId}).run();
     }
 
-    hasVoted(pollId: string, userId: string): boolean {
-
-        const vote = db.query("SELECT * FROM votes WHERE pollId = ? AND userId = ?").get(pollId, userId);        
+    async hasVoted(pollId: string, userId: string): Promise<boolean> {
+        
+        const vote = db.select()
+            .from(schema.votes)
+            .where(and(eq(schema.votes.pollId, pollId), eq(schema.votes.userId, userId)))
+            .get();
+        
         return !!vote;
     }
 }

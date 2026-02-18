@@ -8,8 +8,8 @@ describe("Poll Service", () => {
     pollStore.clear();
   });
 
-  test("Deve criar uma enquete com sucesso", () => {
-    const poll = pollService.createPoll("Qual sua cor favorita?", ["Azul", "Verde", "Paçoca"])
+  test("Deve criar uma enquete com sucesso", async () => {
+    const poll = await pollService.createPoll("Qual sua cor favorita?", ["Azul", "Verde", "Paçoca"])
 
     expect(poll).not.toBeNull();
     expect(poll.title).toBe("Qual sua cor favorita?");
@@ -19,36 +19,39 @@ describe("Poll Service", () => {
   })
 
   test("Deve lançar erro se não tiver opções", () => {
-    expect(() => pollService.createPoll("Qual sua cor favorita?", ["Paçoca"])).toThrow("Uma enquete deve ter pelo menos 2 opções.");
+    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca"]))
+      .rejects.toThrow("Uma enquete deve ter pelo menos 2 opções.");
   })
 
   test("Deve lançar erro se não tiver título", () => {
-    expect(() => pollService.createPoll("", ["Paçoca", "Doce de Leite"])).toThrow("O título da enquete é obrigatório.");
+    expect(pollService.createPoll("", ["Paçoca", "Doce de Leite"]))
+      .rejects.toThrow("O título da enquete é obrigatório.");
   })
 
   test("Deve lançar erro se tiver opções inválidas", () => {
-    expect(() => pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""])).toThrow("Todas as opções devem ter um texto válido.");
+    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""]))
+      .rejects.toThrow("Todas as opções devem ter um texto válido.");
   })
 
 
-  test("Deve votar com sucesso", () => {
+  test("Deve votar com sucesso", async () => {
 
-    const poll = pollService.createPoll("Cor?", ["Azul", "Verde", "Vermelho"])
+    const poll = await pollService.createPoll("Cor?", ["Azul", "Verde", "Vermelho"])
 
-    pollService.vote(poll.id, "1", 0,);
-    const updatedPoll = pollService.vote(poll.id,"2", 1);
+    await pollService.vote(poll.id, "1", 0,);
+    const updatedPoll = await pollService.vote(poll.id, "2", 1);
 
     expect(updatedPoll.options[0]?.votes).toBe(1);
     expect(updatedPoll.options[1]?.votes).toBe(1);
     expect(updatedPoll.options[2]?.votes).toBe(0);
   })
 
-  test("Deve barrar mesmo usuário votar duas vezes", () => {
-    const poll = pollService.createPoll("Cor?", ["Azul", "Amarelo", "Branco"]);
+  test("Deve barrar mesmo usuário votar duas vezes", async () => {
+    const poll = await  pollService.createPoll("Idade", ["22", "34"]);
     const userId = "abc1";
 
-    const updatedPoll = pollService.vote(poll.id, userId, 1);
+    await pollService.vote(poll.id, userId, 1);
 
-    expect(() => pollService.vote(poll.id, userId, 2)).toThrow("Usuário já votou para essa enquete.")
+    expect(pollService.vote(poll.id, userId, 1)).rejects.toThrow("Usuário já votou para essa enquete.")
   })
 })

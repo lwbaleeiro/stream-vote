@@ -29,6 +29,9 @@ Sistema de enquetes em tempo real construído com **TypeScript + Bun**, focado e
 # Instalar dependências
 bun install
 
+# Subir banco
+bunx drizzle-kit push
+
 # Executar servidor
 bun run dev
 

@@ -11,6 +11,3 @@ export interface Poll {
     createdAt: Date;
     isActive: boolean;
 }
-
-
-    

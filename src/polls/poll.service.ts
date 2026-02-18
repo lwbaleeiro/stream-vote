@@ -3,7 +3,7 @@ import type { Poll } from "./poll.model";
 
 class PollService {
 
-  createPoll(title: string, options: string[]) {
+  async createPoll(title: string, options: string[]) {
 
     if (!title.trim()) {
       throw new Error("O título da enquete é obrigatório.");
@@ -29,29 +29,29 @@ class PollService {
       isActive: true
     };
 
-    pollStore.save(poll);
+    await pollStore.save(poll);
     return poll;
   }
 
-  vote(pollId: string, userId: string, optionIndex: number) {
+  async vote(pollId: string, userId: string, optionIndex: number) {
     if (!pollId) throw new Error("Parametro pollId deve ser informado");
     if (optionIndex === undefined || optionIndex === null) throw new Error("Parametro optionIndex deve ser informado");
 
-    const poll = pollStore.getById(pollId);
+    const poll = await pollStore.getById(pollId);
 
     if (!poll) throw new Error("Enquete não encontrada")
-    if (!poll.options[optionIndex]) throw new Error("Opção ded voto invalida.")
-    if (pollStore.hasVoted(pollId, userId)) throw new Error("Usuário já votou para essa enquete.");
+    if (!poll.options[optionIndex]) throw new Error("Opção de voto invalida.")
+    if (await pollStore.hasVoted(pollId, userId)) throw new Error("Usuário já votou para essa enquete.");
 
     pollStore.registreVote(pollId, userId);
     poll.options[optionIndex].votes++;
 
-    pollStore.save(poll);
+    await pollStore.save(poll);
     return poll;
   }
 
-  getPolls() {
-    const activePollsList = pollStore.getAll().filter(poll => poll.isActive === true);
+  async getPolls() {
+    const activePollsList = (await pollStore.getAll()).filter(poll => poll.isActive === true);
     return activePollsList;
   }
 }
