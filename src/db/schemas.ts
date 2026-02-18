@@ -18,3 +18,11 @@ export const votes = sqliteTable("votes", {
     pollId: text("pollId").notNull(),
     userId: text("userId").notNull(),
 }, (table) => [primaryKey( { columns: [table.pollId, table.userId] } )]);
+
+export const users = sqliteTable("users", {
+    id: text("id").primaryKey(),
+    username: text("username").notNull().unique(),
+    passwordHash: text("passwordHash").notNull(),
+    createdAt: text("createdAt").notNull(),
+    isActive: integer("isActive", { mode: "boolean" }).default(true).notNull(),    
+});

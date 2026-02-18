@@ -5,6 +5,7 @@ import { pollStore } from "./poll.store";
 describe("Poll Service", () => {
 
   beforeEach(() => {
+    // tirar de prod
     pollStore.clear();
   });
 
