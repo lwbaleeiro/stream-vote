@@ -16,13 +16,52 @@
     <div class="app">
       <header class="header">
         <h1>🗳️ Stream Vote</h1>
-        <div class="connection-status" id="connectionStatus">
-          <span class="status-dot"></span>
-          <span class="status-text">Desconectado</span>
+        <div class="header-actions">
+          <div id="userProfile" class="user-profile hidden">
+            <span id="usernameDisplay"></span>
+            <button class="btn btn-ghost btn-sm" id="logoutBtn">Sair</button>
+          </div>
+          <div class="connection-status" id="connectionStatus">
+            <span class="status-dot"></span>
+            <span class="status-text">Desconectado</span>
+          </div>
         </div>
       </header>
 
-      <main class="main">
+      <!-- Seção de Autenticação -->
+      <section id="authSection" class="card auth-section">
+        <h2 id="authTitle">Entrar ou Cadastrar</h2>
+        <form id="authForm">
+          <div class="form-group">
+            <label for="username">Usuário</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="Seu apelido"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Sua senha"
+              required
+            />
+          </div>
+          <div class="auth-buttons">
+            <button type="submit" class="btn btn-primary" id="loginBtn">
+              Entrar
+            </button>
+            <button type="button" class="btn btn-ghost" id="registerBtn">
+              Criar Conta
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <main class="main hidden" id="mainContent">
         <!-- Criar Enquete -->
         <section class="card create-section">
           <h2>Criar Nova Enquete</h2>

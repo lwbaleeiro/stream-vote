@@ -124,7 +124,8 @@ body {
   margin-bottom: 0.4rem;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="password"] {
   width: 100%;
   padding: 0.7rem 1rem;
   background: var(--bg-input);
@@ -139,12 +140,14 @@ input[type="text"] {
     box-shadow var(--transition);
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="password"]:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-input[type="text"]::placeholder {
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
   color: var(--text-muted);
 }
 
@@ -240,6 +243,20 @@ input[type="text"]::placeholder {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.auth-buttons .btn-primary {
+  flex: 2;
+}
+
+.auth-buttons .btn-ghost {
+  flex: 1;
 }
 
 .polls-header h2 {
