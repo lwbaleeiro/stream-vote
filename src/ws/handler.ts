@@ -12,7 +12,7 @@ export const wsHandler: WebSocketHandler<WsData> = {
 
     ws.subscribe("general");
   },
-  message(ws, message) {
+  async message(ws, message) {
 
     try {
       const payload = JSON.parse(message.toString());
@@ -20,7 +20,7 @@ export const wsHandler: WebSocketHandler<WsData> = {
       switch (payload.type) {
         case "CREATE_POLL":
         const validData = validateCreatePoll(payload.data);
-        const newPoll = pollService.createPoll(validData.title, validData.options);
+        const newPoll = await pollService.createPoll(validData.title, validData.options);
 
           ws.send(JSON.stringify({ type: "POLL_CREATED", data: newPoll }));
           ws.publish("general", JSON.stringify({ type: "POLL_CREATED", data: newPoll }));
@@ -30,7 +30,7 @@ export const wsHandler: WebSocketHandler<WsData> = {
         case "VOTE":
           const validVoteData = validateVote(payload.data);
 
-          const updatedPoll = pollService.vote(validVoteData.pollId, ws.data.userId, validVoteData.optionIndex);
+          const updatedPoll = await pollService.vote(validVoteData.pollId, ws.data.userId, validVoteData.optionIndex);
 
           ws.publish("general", JSON.stringify({ type: "POLL_UPDATED", data: updatedPoll }));
           ws.send(JSON.stringify({ type: "POLL_UPDATED", data: updatedPoll }));
@@ -38,7 +38,7 @@ export const wsHandler: WebSocketHandler<WsData> = {
           console.log("Voto computado para a enquete: ", updatedPoll.title);
           break;
         case "GET_POLLS":
-          const pollsList = pollService.getPolls();
+          const pollsList = await pollService.getPolls();
 
          ws.send(JSON.stringify({ type: "POLLS_LIST", data: pollsList }));
 

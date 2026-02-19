@@ -110,13 +110,13 @@ pool-system/
 
 ## Roadmap
 
-- [ ] CRUD básico de enquetes (HTTP)
-- [ ] WebSocket — votar e receber resultados ao vivo
-- [ ] Validações de input
-- [ ] Controle de voto único por usuário
-- [ ] Testes básicos
-- [ ] Persistência (SQLite/arquivo)
-- [ ] Frontend simples (HTML + JS)
+- [x] CRUD básico de enquetes (HTTP)
+- [x] WebSocket — votar e receber resultados ao vivo
+- [x] Validações de input
+- [x] Controle de voto único por usuário
+- [x] Testes básicos
+- [x] Persistência (SQLite/arquivo)
+- [x] Frontend simples (HTML + JS)
 
 ## Licença
 
