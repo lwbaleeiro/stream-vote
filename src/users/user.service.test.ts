@@ -25,4 +25,21 @@ describe("User Service", () => {
 
     expect(userLoginId).not.toBeNull();
   })
+
+  test("Deve adicionar score ao usuário", async () => {
+    const user = await userService.register("teste_silva", "abc123")
+    await userStore.addScore(user.id, 10)
+
+    const updatedUser = await userStore.getByUsername("teste_silva")
+    expect(updatedUser?.score).toBe(10);
+  })
+
+  test("Deve acumular score ao adicionar múltiplas vezes", async () => {
+    const user = await userService.register("teste_silva", "abc123")
+    await userStore.addScore(user.id, 5)
+    await userStore.addScore(user.id, 5)
+
+    const updatedUser = await userStore.getByUsername("teste_silva")
+    expect(updatedUser?.score).toBe(10);
+  })
 })

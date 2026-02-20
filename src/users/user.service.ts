@@ -17,7 +17,8 @@ class UserService {
             username,
             passwordHash: await Bun.password.hash(password),
             createdAt: new Date(),
-            isActive: true
+            isActive: true,
+            score: 0
         };
 
         await userStore.save(user);

@@ -12,7 +12,8 @@ class UserStore {
             username: user.username,
             passwordHash: user.passwordHash,
             createdAt: user.createdAt.toISOString(),
-            isActive: user.isActive
+            isActive: user.isActive,
+            score: user.score ?? 0
         }).onConflictDoUpdate({
             target: schema.users.id,
             set: { passwordHash: user.passwordHash, isActive: user.isActive }
@@ -30,12 +31,23 @@ class UserStore {
 
         return {
             ...result,
-            createdAt: new Date(result.createdAt) 
+            createdAt: new Date(result.createdAt),
+            score: result.score ?? 0
         }
     }
 
     clear() {
         db.delete(schema.users).run();
+    }
+
+    async addScore(userId: string, points: number): Promise<void> {
+        const user = db.select().from(schema.users).where(eq(schema.users.id, userId)).get();
+        if (!user) return;
+        
+        db.update(schema.users)
+            .set({ score: user.score + points })
+            .where(eq(schema.users.id, userId))
+            .run();
     }
 }
 

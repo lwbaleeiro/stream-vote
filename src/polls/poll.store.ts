@@ -2,6 +2,7 @@ import type { Poll } from "./poll.model";
 import { db } from "../db/index.ts";
 import { eq, and} from "drizzle-orm"
 import * as schema from "../db/schemas";
+import type { User } from "../users/user.model.ts";
 
 class PollStore {
 
@@ -51,7 +52,8 @@ class PollStore {
             options: optionsRows.map(opt => ({
                 index: opt.idx,
                 text: opt.text,
-                votes: opt.votes
+                votes: opt.votes,
+                isCorrect: opt.isCorrect
             }))
         };
     }
@@ -76,7 +78,8 @@ class PollStore {
                 options: optionsRows.map(opt => ({
                     index: opt.idx,
                     text: opt.text,
-                    votes: opt.votes
+                    votes: opt.votes,
+                    isCorrect: opt.isCorrect
                 }))
             };
         });
@@ -88,9 +91,14 @@ class PollStore {
         db.delete(schema.votes).run();
     }
 
-    async registreVote(pollId: string, userId: string): Promise<void> {
+    async registreVote(pollId: string, userId: string, optionIndex: number): Promise<void> {
 
-        db.insert(schema.votes).values({ pollId: pollId, userId: userId}).run();
+        db.insert(schema.votes).values({ 
+            pollId: pollId, 
+            userId: userId, 
+            optionIndex: 
+            optionIndex
+        }).run();
     }
 
     async hasVoted(pollId: string, userId: string): Promise<boolean> {
@@ -101,6 +109,27 @@ class PollStore {
             .get();
         
         return !!vote;
+    }
+
+    async winningUsers(pollId: string, optionIndex: number): Promise<User[]> {
+        
+        const results = db.select({
+            user: schema.users
+        })
+        .from(schema.votes)
+        .innerJoin(schema.users, eq(schema.votes.userId, schema.users.id))
+        .where(
+            and(
+                eq(schema.votes.pollId, pollId),
+                eq(schema.votes.optionIndex, optionIndex)
+            )
+        )
+        .all();
+
+        return results.map(r => ({
+            ...r.user,
+            createdAt: new Date(r.user.createdAt)
+        }));
     }
 }
 

@@ -12,11 +12,13 @@ export const options = sqliteTable("options", {
     idx: integer("idx").notNull(),
     text: text("text").notNull(),
     votes: integer("votes").default(0).notNull(),
+    isCorrect: integer("isCorrect", { mode: "boolean" }).default(false).notNull()
 }, (table) => [primaryKey( { columns: [table.pollId, table.idx] } )]);
 
 export const votes = sqliteTable("votes", {
     pollId: text("pollId").notNull(),
     userId: text("userId").notNull(),
+    optionIndex: integer("optionIndex").notNull(),
 }, (table) => [primaryKey( { columns: [table.pollId, table.userId] } )]);
 
 export const users = sqliteTable("users", {
@@ -24,5 +26,6 @@ export const users = sqliteTable("users", {
     username: text("username").notNull().unique(),
     passwordHash: text("passwordHash").notNull(),
     createdAt: text("createdAt").notNull(),
-    isActive: integer("isActive", { mode: "boolean" }).default(true).notNull(),    
+    isActive: integer("isActive", { mode: "boolean" }).default(true).notNull(),
+    score: integer("score").default(0).notNull()    
 });

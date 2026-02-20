@@ -1,5 +1,7 @@
 import { pollStore } from "./poll.store";
+import { userStore } from "../users/user.store";
 import type { Poll } from "./poll.model";
+import type { User } from "../users/user.model";
 
 class PollService {
 
@@ -23,7 +25,8 @@ class PollService {
       options: options.map((option, index) => ({
         index,
         text: option,
-        votes: 0
+        votes: 0,
+        isCorrect: false,
       })),
       createdAt: new Date(),
       isActive: true
@@ -43,9 +46,9 @@ class PollService {
     if (!poll.options[optionIndex]) throw new Error("Opção de voto invalida.")
     if (await pollStore.hasVoted(pollId, userId)) throw new Error("Usuário já votou para essa enquete.");
 
-    pollStore.registreVote(pollId, userId);
+    pollStore.registreVote(pollId, userId, optionIndex);
     poll.options[optionIndex].votes++;
-
+  
     await pollStore.save(poll);
     return poll;
   }
@@ -54,6 +57,32 @@ class PollService {
     const activePollsList = (await pollStore.getAll()).filter(poll => poll.isActive === true);
     return activePollsList;
   }
+
+  async closePolls(pollId: string, correctAwnser: number) {
+
+    if (!pollId) throw new Error("Parametro pollId deve ser informado");
+
+    const poll = await pollStore.getById(pollId);
+
+    if (!poll) throw new Error("Enquete não encontrada")
+    if (!poll.options[correctAwnser]) throw new Error("Opção de voto invalida.")
+    
+    poll.isActive = false;
+    poll.options[correctAwnser].isCorrect = true;
+
+    await pollStore.save(poll);
+
+    const winningUsers = await pollStore.winningUsers(pollId, correctAwnser);
+    await addScore(winningUsers);
+  }
 }
 
 export const pollService = new PollService();
+
+async function addScore(winningUsers: User[]) {
+    const POINTS_PER_CORRECT = 5;
+    for (const user of winningUsers) {
+        await userStore.addScore(user.id, POINTS_PER_CORRECT);
+    }
+}
+

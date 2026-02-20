@@ -2,6 +2,7 @@ export interface PollOption {
     index: number;
     text: string;
     votes: number;
+    isCorrect: boolean;
 }
 
 export interface Poll {

@@ -4,4 +4,5 @@ export interface User {
     passwordHash: string;
     createdAt: Date;
     isActive: boolean;
+    score: number;
 }
