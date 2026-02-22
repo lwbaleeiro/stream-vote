@@ -10,7 +10,11 @@ describe("Poll Service", () => {
   });
 
   test("Deve criar uma enquete com sucesso", async () => {
-    const poll = await pollService.createPoll("Qual sua cor favorita?", ["Azul", "Verde", "Paçoca"])
+    const poll = await pollService.createPoll(
+      "Qual sua cor favorita?", 
+      ["Azul", "Verde", "Paçoca"], 
+      new Date('2199-01-01')
+    );
 
     expect(poll).not.toBeNull();
     expect(poll.title).toBe("Qual sua cor favorita?");
@@ -20,24 +24,29 @@ describe("Poll Service", () => {
   })
 
   test("Deve lançar erro se não tiver opções", () => {
-    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca"]))
+    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca"], new Date('2199-01-01')))
       .rejects.toThrow("Uma enquete deve ter pelo menos 2 opções.");
   })
 
   test("Deve lançar erro se não tiver título", () => {
-    expect(pollService.createPoll("", ["Paçoca", "Doce de Leite"]))
+    expect(pollService.createPoll("", ["Paçoca", "Doce de Leite"], new Date('2199-01-01')))
       .rejects.toThrow("O título da enquete é obrigatório.");
   })
 
   test("Deve lançar erro se tiver opções inválidas", () => {
-    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""]))
+    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""], new Date('2199-01-01')))
       .rejects.toThrow("Todas as opções devem ter um texto válido.");
+  })
+
+  test("Deve lançar erro data invalida", () => {
+    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""], new Date('2199-13-45')))
+      .rejects.toThrow("Data de encerramento da enquente é invalida.");
   })
 
 
   test("Deve votar com sucesso", async () => {
 
-    const poll = await pollService.createPoll("Cor?", ["Azul", "Verde", "Vermelho"])
+    const poll = await pollService.createPoll("Cor?", ["Azul", "Verde", "Vermelho"], new Date('2199-01-01'))
 
     await pollService.vote(poll.id, "1", 0,);
     const updatedPoll = await pollService.vote(poll.id, "2", 1);
@@ -48,7 +57,7 @@ describe("Poll Service", () => {
   })
 
   test("Deve barrar mesmo usuário votar duas vezes", async () => {
-    const poll = await  pollService.createPoll("Idade", ["22", "34"]);
+    const poll = await  pollService.createPoll("Idade", ["22", "34"], new Date('2199-01-01'));
     const userId = "abc1";
 
     await pollService.vote(poll.id, userId, 1);

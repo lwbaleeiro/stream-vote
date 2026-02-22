@@ -41,24 +41,6 @@ bun test
 # O servidor inicia em http://localhost:3000
 ```
 
-## Testar WebSocket
-
-- Deixe o servidor rodando (bun run dev).
-- Abra seu navegador (Chrome, Firefox, etc.).
-- Aperte F12 para abrir o Console do Desenvolvedor.
-- Digite os seguintes comandos:
-
-```javascript
-// Conectar
-const ws = new WebSocket("ws://localhost:3000");
-// Escutar o que o servidor envia
-ws.onmessage = (event) => console.log("Resposta do Servidor:", event.data);
-// Enviar uma mensagem (espere 1 segundo para a conexão abrir)
-setTimeout(() => {
-  ws.send("Olá do Navegador!");
-}, 1000);
-```
-
 Você deverá ver o log tanto no terminal quanto no console do navegador!
 
 ## Scripts
@@ -117,7 +99,3 @@ pool-system/
 - [x] Testes básicos
 - [x] Persistência (SQLite/arquivo)
 - [x] Frontend simples (HTML + JS)
-
-## Licença
-
-MIT

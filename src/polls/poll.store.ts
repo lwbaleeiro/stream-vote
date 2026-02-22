@@ -12,7 +12,8 @@ class PollStore {
             id: poll.id, 
             title: poll.title, 
             createdAt: poll.createdAt.toISOString(), 
-            isActive: poll.isActive
+            isActive: poll.isActive,
+            endDate: poll.endDate.toISOString(),
         }).onConflictDoUpdate({ 
             target: schema.polls.id, 
             set: { isActive: poll.isActive, title: poll.title } 
@@ -49,6 +50,7 @@ class PollStore {
         return {
             ...result,
             createdAt: new Date(result.createdAt),
+            endDate: new Date(result.endDate),
             options: optionsRows.map(opt => ({
                 index: opt.idx,
                 text: opt.text,
@@ -75,6 +77,7 @@ class PollStore {
                 title: row.title,
                 createdAt: new Date(row.createdAt),
                 isActive: row.isActive,
+                endDate: new Date(row.endDate),
                 options: optionsRows.map(opt => ({
                     index: opt.idx,
                     text: opt.text,

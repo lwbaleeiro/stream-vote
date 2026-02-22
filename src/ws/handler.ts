@@ -29,7 +29,6 @@ export const wsHandler: WebSocketHandler<WsData> = {
           break;
         case "VOTE":
           const validVoteData = validateVote(payload.data);
-
           const updatedPoll = await pollService.vote(validVoteData.pollId, ws.data.userId, validVoteData.optionIndex);
 
           ws.publish("general", JSON.stringify({ type: "POLL_UPDATED", data: updatedPoll }));
@@ -40,7 +39,7 @@ export const wsHandler: WebSocketHandler<WsData> = {
         case "GET_POLLS":
           const pollsList = await pollService.getPolls();
 
-         ws.send(JSON.stringify({ type: "POLLS_LIST", data: pollsList }));
+          ws.send(JSON.stringify({ type: "POLLS_LIST", data: pollsList }));
 
           console.log("Retornado list de polls ativas.");
           break;

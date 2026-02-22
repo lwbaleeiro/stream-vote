@@ -5,10 +5,14 @@ import type { User } from "../users/user.model";
 
 class PollService {
 
-  async createPoll(title: string, options: string[]) {
+  async createPoll(title: string, options: string[], endDate: Date) {
 
     if (!title.trim()) {
       throw new Error("O título da enquete é obrigatório.");
+    }
+
+    if (isNaN(endDate.getTime())) {
+      throw new Error("Data de encerramento da enquente é invalida.");
     }
 
     if (options.length < 2) {
@@ -29,7 +33,8 @@ class PollService {
         isCorrect: false,
       })),
       createdAt: new Date(),
-      isActive: true
+      isActive: true,
+      endDate: endDate
     };
 
     await pollStore.save(poll);

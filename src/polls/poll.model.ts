@@ -11,4 +11,5 @@ export interface Poll {
     options: PollOption[];
     createdAt: Date;
     isActive: boolean;
+    endDate: Date; 
 }
