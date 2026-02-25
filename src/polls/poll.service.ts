@@ -5,7 +5,7 @@ import type { User } from "../users/user.model";
 
 class PollService {
 
-  async createPoll(title: string, options: string[], endDate: Date) {
+  async createPoll(title: string, options: string[], endDate: Date, correctOptionIndex?: number) {
 
     if (!title.trim()) {
       throw new Error("O título da enquete é obrigatório.");
@@ -30,7 +30,7 @@ class PollService {
         index,
         text: option,
         votes: 0,
-        isCorrect: false,
+        isCorrect: index === correctOptionIndex,
       })),
       createdAt: new Date(),
       isActive: true,

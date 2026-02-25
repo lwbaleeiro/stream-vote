@@ -158,27 +158,67 @@ logoutBtn.addEventListener("click", () => {
 form.addEventListener("submit", (e) => {
     e.preventDefault();
     const title = document.getElementById("pollTitle").value.trim();
-    const optionInputs = document.querySelectorAll(".option-input");
-    const options = Array.from(optionInputs).map(i => i.value.trim()).filter(v => v);
+    const endDateInput = document.getElementById("pollEndDate").value;
+    const optionRows = optionsContainer.querySelectorAll(".option-row");
+    
+    const options = [];
+    let correctOptionIndex = null;
+
+    optionRows.forEach((row, index) => {
+        const text = row.querySelector(".option-input").value.trim();
+        if (text) {
+            options.push(text);
+            const isCorrect = row.querySelector('input[name="correctOption"]').checked;
+            if (isCorrect) correctOptionIndex = options.length - 1;
+        }
+    });
 
     if (options.length < 2) return showToast("Pelo menos 2 opções.", "error");
 
-    ws.send(JSON.stringify({ type: "CREATE_POLL", data: { title, options } }));
+    const pollData = { 
+        title, 
+        options,
+        endDate: endDateInput ? new Date(endDateInput).toISOString() : null,
+        correctOptionIndex
+    };
+
+    ws.send(JSON.stringify({ type: "CREATE_POLL", data: pollData }));
     form.reset();
-    optionsContainer.innerHTML = `
-        <input type="text" class="option-input" placeholder="Opção 1" required>
-        <input type="text" class="option-input" placeholder="Opção 2" required>
-    `;
+    resetOptions();
 });
 
+function resetOptions() {
+    optionsContainer.innerHTML = `
+        <div class="option-row">
+            <input type="text" class="option-input" placeholder="Opção 1" required>
+            <label class="correct-option-label">
+                <input type="radio" name="correctOption" value="0">
+                <span>Correta</span>
+            </label>
+        </div>
+        <div class="option-row">
+            <input type="text" class="option-input" placeholder="Opção 2" required>
+            <label class="correct-option-label">
+                <input type="radio" name="correctOption" value="1">
+                <span>Correta</span>
+            </label>
+        </div>
+    `;
+}
+
 addOptionBtn.addEventListener("click", () => {
-    const count = optionsContainer.querySelectorAll(".option-input").length + 1;
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "option-input";
-    input.placeholder = `Opção ${count}`;
-    optionsContainer.appendChild(input);
-    input.focus();
+    const count = optionsContainer.querySelectorAll(".option-row").length;
+    const row = document.createElement("div");
+    row.className = "option-row";
+    row.innerHTML = `
+        <input type="text" class="option-input" placeholder="Opção ${count + 1}">
+        <label class="correct-option-label">
+            <input type="radio" name="correctOption" value="${count}">
+            <span>Correta</span>
+        </label>
+    `;
+    optionsContainer.appendChild(row);
+    row.querySelector(".option-input").focus();
 });
 
 refreshBtn.addEventListener("click", () => {
@@ -200,10 +240,13 @@ function renderPolls() {
         const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
         const optionsHtml = poll.options.map((opt) => {
             const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+            const isCorrectClass = opt.isCorrect ? "is-correct" : "";
+            const correctBadge = opt.isCorrect ? ' <span class="correct-badge">✓</span>' : "";
+            
             return `
-                <div class="poll-option" onclick="vote('${poll.id}', ${opt.index})">
+                <div class="poll-option ${isCorrectClass}" onclick="vote('${poll.id}', ${opt.index})">
                     <div class="option-bar" style="width: ${percentage}%"></div>
-                    <span class="option-text">${escapeHtml(opt.text)}</span>
+                    <span class="option-text">${escapeHtml(opt.text)}${correctBadge}</span>
                     <span class="option-votes">${opt.votes} (${percentage}%)</span>
                 </div>
             `;
@@ -211,12 +254,15 @@ function renderPolls() {
 
         const pollEl = document.createElement("div");
         pollEl.className = "poll-item";
+        
+        const endDateTime = poll.endDate ? new Date(poll.endDate).toLocaleString("pt-BR") : "Sem prazo";
+        
         pollEl.innerHTML = `
             <h3>${escapeHtml(poll.title)}</h3>
             <div class="poll-options">${optionsHtml}</div>
             <div class="poll-meta">
                 <span>Total: ${totalVotes} voto${totalVotes !== 1 ? "s" : ""}</span>
-                <span>${new Date(poll.createdAt).toLocaleTimeString("pt-BR")}</span>
+                <span>Fim: ${endDateTime}</span>
             </div>
         `;
         pollsList.appendChild(pollEl);

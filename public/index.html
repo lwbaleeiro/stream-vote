@@ -15,7 +15,7 @@
   <body>
     <div class="app">
       <header class="header">
-        <h1>🗳️ Stream Vote</h1>
+        <h1>Stream Vote</h1>
         <div class="header-actions">
           <div id="userProfile" class="user-profile hidden">
             <span id="usernameDisplay"></span>
@@ -78,22 +78,28 @@
             <div class="form-group">
               <label>Opções</label>
               <div id="optionsContainer">
-                <input
-                  type="text"
-                  class="option-input"
-                  placeholder="Opção 1"
-                  required
-                />
-                <input
-                  type="text"
-                  class="option-input"
-                  placeholder="Opção 2"
-                  required
-                />
+                <div class="option-row">
+                  <input type="text" class="option-input" placeholder="Opção 1" required />
+                  <label class="correct-option-label">
+                    <input type="radio" name="correctOption" value="0" />
+                    <span>Correta</span>
+                  </label>
+                </div>
+                <div class="option-row">
+                  <input type="text" class="option-input" placeholder="Opção 2" required />
+                  <label class="correct-option-label">
+                    <input type="radio" name="correctOption" value="1" />
+                    <span>Correta</span>
+                  </label>
+                </div>
               </div>
               <button type="button" class="btn btn-secondary" id="addOptionBtn">
                 + Adicionar Opção
               </button>
+            </div>
+            <div class="form-group">
+              <label for="pollEndDate">Data de Encerramento (Opcional)</label>
+              <input type="datetime-local" id="pollEndDate" />
             </div>
             <button type="submit" class="btn btn-primary">Criar Enquete</button>
           </form>

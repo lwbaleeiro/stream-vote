@@ -20,7 +20,7 @@ export const wsHandler: WebSocketHandler<WsData> = {
       switch (payload.type) {
         case "CREATE_POLL":
         const validData = validateCreatePoll(payload.data);
-        const newPoll = await pollService.createPoll(validData.title, validData.options);
+        const newPoll = await pollService.createPoll(validData.title, validData.options, validData.endDate, validData.correctOptionIndex);
 
           ws.send(JSON.stringify({ type: "POLL_CREATED", data: newPoll }));
           ws.publish("general", JSON.stringify({ type: "POLL_CREATED", data: newPoll }));
