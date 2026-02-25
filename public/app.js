@@ -175,6 +175,13 @@ form.addEventListener("submit", (e) => {
 
     if (options.length < 2) return showToast("Pelo menos 2 opções.", "error");
 
+    if (endDateInput) {
+        const endDate = new Date(endDateInput);
+        if (endDate <= new Date()) {
+            return showToast("A data de encerramento deve ser no futuro.", "error");
+        }
+    }
+
     const pollData = { 
         title, 
         options,
@@ -238,10 +245,13 @@ function renderPolls() {
     pollsList.innerHTML = "";
     polls.forEach((poll) => {
         const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+        const isExpired = poll.endDate && new Date(poll.endDate) <= new Date();
+        const showResults = !poll.isActive || isExpired;
+
         const optionsHtml = poll.options.map((opt) => {
             const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
-            const isCorrectClass = opt.isCorrect ? "is-correct" : "";
-            const correctBadge = opt.isCorrect ? ' <span class="correct-badge">✓</span>' : "";
+            const isCorrectClass = (showResults && opt.isCorrect) ? "is-correct" : "";
+            const correctBadge = (showResults && opt.isCorrect) ? ' <span class="correct-badge">✓</span>' : "";
             
             return `
                 <div class="poll-option ${isCorrectClass}" onclick="vote('${poll.id}', ${opt.index})">
