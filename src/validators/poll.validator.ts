@@ -23,6 +23,7 @@ export function validateVote(data: any): { pollId: string; optionIndex: number; 
 
     if (typeof data.pollId !== "string" || data.pollId.trim() == "") throw new Error("pollId é obrigatório e deve ser do tipo 'string'");
     if (typeof data.optionIndex !== "number") throw new Error("optionIndex é obrigatório e deve ser do tipo 'number'");
+
     return { 
         pollId: data.pollId, 
         optionIndex: data.optionIndex, 

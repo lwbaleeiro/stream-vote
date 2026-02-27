@@ -46,7 +46,7 @@ describe("Poll Service", () => {
 
   test("Deve votar com sucesso", async () => {
 
-    const poll = await pollService.createPoll("Cor?", ["Azul", "Verde", "Vermelho"], new Date('2199-01-01'))
+    const poll = await pollService.createPoll("Better programming languages?", ["Rust", "Java", "Go", "TypeScript"], new Date('2126-03-01'))
 
     await pollService.vote(poll.id, "1", 0,);
     const updatedPoll = await pollService.vote(poll.id, "2", 1);
@@ -57,7 +57,7 @@ describe("Poll Service", () => {
   })
 
   test("Deve barrar mesmo usuário votar duas vezes", async () => {
-    const poll = await  pollService.createPoll("Idade", ["22", "34"], new Date('2199-01-01'));
+    const poll = await pollService.createPoll("Better programming languages?", ["Rust", "Java", "Go", "TypeScript"], new Date('2126-03-01'))
     const userId = "abc1";
 
     await pollService.vote(poll.id, userId, 1);

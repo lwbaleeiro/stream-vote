@@ -1,5 +1,7 @@
 import { wsHandler, type WsData } from "./ws/handler";
 import { userService } from "./users/user.service"
+import { pollService } from "./polls/poll.service";
+import { bus } from "./events";
 import path from "path";
 
 const PUBLIC_DIR = path.resolve(import.meta.dir, "../public");
@@ -42,5 +44,18 @@ const server = Bun.serve({
     },
     websocket: wsHandler
 });
+
+bus.on("ranking_changed", (ranking) => {
+    server.publish("general", JSON.stringify({ type: "RANKING_UPDATED", data: ranking }));
+});
+
+bus.on("poll_closed", (poll) => {
+    server.publish("general", JSON.stringify({ type: "POLL_UPDATED", data: poll }));
+});
+
+// Job de verificação de enquetes expiradas (a cada 30 segundos)
+setInterval(() => {
+    pollService.checkExpiredPolls();
+}, 30000);
 
 console.log(`Server running at http://${server.hostname}:${server.port}`);

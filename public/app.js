@@ -22,6 +22,8 @@ const userProfile = document.getElementById("userProfile");
 const usernameDisplay = document.getElementById("usernameDisplay");
 const logoutBtn = document.getElementById("logoutBtn");
 const registerBtn = document.getElementById("registerBtn");
+const rankingSidebar = document.getElementById("rankingSidebar");
+const rankingList = document.getElementById("rankingList");
 
 // ===== Initialization =====
 function init() {
@@ -36,6 +38,7 @@ function init() {
 function showMainContent() {
     authSection.classList.add("hidden");
     mainContent.classList.remove("hidden");
+    rankingSidebar.classList.remove("hidden");
     userProfile.classList.remove("hidden");
     usernameDisplay.textContent = `Hi, ${user.username}`;
 }
@@ -43,6 +46,7 @@ function showMainContent() {
 function showAuthContent() {
     authSection.classList.remove("hidden");
     mainContent.classList.add("hidden");
+    rankingSidebar.classList.add("hidden");
     userProfile.classList.add("hidden");
 }
 
@@ -58,6 +62,7 @@ function connectWebSocket() {
         statusEl.querySelector(".status-text").textContent = "Conectado";
         showToast("Conectado ao servidor!", "success");
         ws.send(JSON.stringify({ type: "GET_POLLS" }));
+        ws.send(JSON.stringify({ type: "GET_RANKING" }));
     });
 
     ws.addEventListener("close", () => {
@@ -88,6 +93,10 @@ function handleWsMessage(payload) {
             polls.clear();
             payload.data.forEach(p => polls.set(p.id, p));
             renderPolls();
+            break;
+        case "RANKING_LIST":
+        case "RANKING_UPDATED":
+            renderRanking(payload.data);
             break;
         case "ERROR":
             showToast(payload.data.message, "error");
@@ -233,6 +242,15 @@ refreshBtn.addEventListener("click", () => {
 });
 
 function vote(pollId, optionIndex) {
+    const poll = polls.get(pollId);
+    if (!poll) return;
+
+    const isExpired = poll.endDate && new Date(poll.endDate) <= new Date();
+    if (!poll.isActive || isExpired) {
+        showToast("Esta enquete já está encerrada.", "error");
+        return;
+    }
+
     ws.send(JSON.stringify({ type: "VOTE", data: { pollId, optionIndex } }));
 }
 
@@ -252,9 +270,10 @@ function renderPolls() {
             const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
             const isCorrectClass = (showResults && opt.isCorrect) ? "is-correct" : "";
             const correctBadge = (showResults && opt.isCorrect) ? ' <span class="correct-badge">✓</span>' : "";
+            const disabledClass = showResults ? "disabled" : "";
             
             return `
-                <div class="poll-option ${isCorrectClass}" onclick="vote('${poll.id}', ${opt.index})">
+                <div class="poll-option ${isCorrectClass} ${disabledClass}" onclick="vote('${poll.id}', ${opt.index})">
                     <div class="option-bar" style="width: ${percentage}%"></div>
                     <span class="option-text">${escapeHtml(opt.text)}${correctBadge}</span>
                     <span class="option-votes">${opt.votes} (${percentage}%)</span>
@@ -263,12 +282,14 @@ function renderPolls() {
         }).join("");
 
         const pollEl = document.createElement("div");
-        pollEl.className = "poll-item";
+        const pollExpiredClass = showResults ? "poll-expired" : "";
+        pollEl.className = `poll-item ${pollExpiredClass}`;
         
         const endDateTime = poll.endDate ? new Date(poll.endDate).toLocaleString("pt-BR") : "Sem prazo";
+        const statusText = showResults ? ' <span class="status-expired">(Encerrada)</span>' : "";
         
         pollEl.innerHTML = `
-            <h3>${escapeHtml(poll.title)}</h3>
+            <h3>${escapeHtml(poll.title)}${statusText}</h3>
             <div class="poll-options">${optionsHtml}</div>
             <div class="poll-meta">
                 <span>Total: ${totalVotes} voto${totalVotes !== 1 ? "s" : ""}</span>
@@ -277,6 +298,24 @@ function renderPolls() {
         `;
         pollsList.appendChild(pollEl);
     });
+}
+
+function renderRanking(users) {
+    if (!users || users.length === 0) {
+        rankingList.innerHTML = '<p class="empty-state">Ninguém pontuou ainda.</p>';
+        return;
+    }
+
+    rankingList.innerHTML = users.map((u, index) => {
+        const medal = index === 0 ? "🥇 " : index === 1 ? "🥈 " : index === 2 ? "🥉 " : "";
+        return `
+            <div class="ranking-item">
+                <span class="rank-number">${index + 1}</span>
+                <span class="rank-username">${medal}${escapeHtml(u.username)}</span>
+                <span class="rank-score">${u.score} pts</span>
+            </div>
+        `;
+    }).join("");
 }
 
 function escapeHtml(text) {

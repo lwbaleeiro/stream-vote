@@ -1,6 +1,6 @@
 import type { User } from "./user.model";
 import { db } from "../db/index.ts";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import * as schema from "../db/schemas";    
 
 class UserStore {
@@ -48,6 +48,14 @@ class UserStore {
             .set({ score: user.score + points })
             .where(eq(schema.users.id, userId))
             .run();
+    }
+
+    async getRanking(limit: number = 10) {
+        return db.select()
+            .from(schema.users)
+            .orderBy(desc(schema.users.score))
+            .limit(limit)
+            .all();
     }
 }
 

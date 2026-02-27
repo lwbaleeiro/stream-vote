@@ -24,10 +24,11 @@ class PollStore {
                 pollId: poll.id, 
                 idx: opt.index, 
                 text: opt.text, 
-                votes: opt.votes 
+                votes: opt.votes,
+                isCorrect: opt.isCorrect
             }).onConflictDoUpdate({
                 target: [schema.options.pollId, schema.options.idx],
-                set: { votes: opt.votes }
+                set: { votes: opt.votes, isCorrect: opt.isCorrect }
             })
             .run()
         );

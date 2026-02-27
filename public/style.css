@@ -41,9 +41,16 @@ body {
 
 /* ===== Layout ===== */
 .app {
-  max-width: 720px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 1.5rem;
+}
+
+.layout-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.5rem;
+  align-items: start;
 }
 
 /* ===== Header ===== */
@@ -359,6 +366,28 @@ input[type="password"]::placeholder {
   transition: border-color var(--transition);
 }
 
+.poll-option.disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.poll-item.poll-expired {
+  border-color: var(--text-muted);
+  opacity: 0.9;
+}
+
+.status-expired {
+  font-size: 0.7rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--accent-glow);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
 .poll-option.is-correct {
   border-color: var(--success);
   background: rgba(46, 204, 113, 0.05);
@@ -456,6 +485,78 @@ input[type="password"]::placeholder {
   border: 1px solid var(--border);
 }
 
+/* ===== Ranking Sidebar ===== */
+.ranking-sidebar {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.ranking-card {
+  padding: 1.2rem;
+  background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary));
+  border: 1px solid var(--border);
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem;
+  background: rgba(15, 52, 96, 0.4);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all var(--transition);
+}
+
+.ranking-item:hover {
+  border-color: var(--accent);
+  background: rgba(233, 69, 96, 0.05);
+  transform: translateX(4px);
+}
+
+.rank-number {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  width: 24px;
+}
+
+.ranking-item:nth-child(1) .rank-number {
+  color: #ffd700;
+  font-size: 1.2rem;
+} /* Gold */
+.ranking-item:nth-child(2) .rank-number {
+  color: #c0c0c0;
+  font-size: 1.1rem;
+} /* Silver */
+.ranking-item:nth-child(3) .rank-number {
+  color: #cd7f32;
+  font-size: 1.1rem;
+} /* Bronze */
+
+.rank-username {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.rank-score {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-glow);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -477,6 +578,17 @@ input[type="password"]::placeholder {
 }
 
 /* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .layout-container {
+    grid-template-columns: 1fr;
+  }
+
+  .ranking-sidebar {
+    position: static;
+    margin-bottom: 1.5rem;
+  }
+}
+
 @media (max-width: 480px) {
   .app {
     padding: 1rem;

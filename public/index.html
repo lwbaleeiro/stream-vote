@@ -61,61 +61,89 @@
         </form>
       </section>
 
-      <main class="main hidden" id="mainContent">
-        <!-- Criar Enquete -->
-        <section class="card create-section">
-          <h2>Criar Nova Enquete</h2>
-          <form id="createPollForm">
-            <div class="form-group">
-              <label for="pollTitle">Título da Enquete</label>
-              <input
-                type="text"
-                id="pollTitle"
-                placeholder="Ex: Qual a melhor linguagem?"
-                required
-              />
+      <div class="layout-container">
+        <!-- Sidebar Ranking -->
+        <aside id="rankingSidebar" class="ranking-sidebar hidden">
+          <div class="card ranking-card">
+            <h2>🏆 Ranking</h2>
+            <div id="rankingList" class="ranking-list">
+              <p class="empty-state">Carregando...</p>
             </div>
-            <div class="form-group">
-              <label>Opções</label>
-              <div id="optionsContainer">
-                <div class="option-row">
-                  <input type="text" class="option-input" placeholder="Opção 1" required />
-                  <label class="correct-option-label">
-                    <input type="radio" name="correctOption" value="0" />
-                    <span>Correta</span>
-                  </label>
-                </div>
-                <div class="option-row">
-                  <input type="text" class="option-input" placeholder="Opção 2" required />
-                  <label class="correct-option-label">
-                    <input type="radio" name="correctOption" value="1" />
-                    <span>Correta</span>
-                  </label>
-                </div>
-              </div>
-              <button type="button" class="btn btn-secondary" id="addOptionBtn">
-                + Adicionar Opção
-              </button>
-            </div>
-            <div class="form-group">
-              <label for="pollEndDate">Data de Encerramento (Opcional)</label>
-              <input type="datetime-local" id="pollEndDate" />
-            </div>
-            <button type="submit" class="btn btn-primary">Criar Enquete</button>
-          </form>
-        </section>
+          </div>
+        </aside>
 
-        <!-- Lista de Enquetes -->
-        <section class="card polls-section">
-          <div class="polls-header">
-            <h2>Enquetes Ativas</h2>
-            <button class="btn btn-ghost" id="refreshBtn">↻ Atualizar</button>
-          </div>
-          <div id="pollsList" class="polls-list">
-            <p class="empty-state">Nenhuma enquete ativa. Crie uma acima!</p>
-          </div>
-        </section>
-      </main>
+        <main class="main hidden" id="mainContent">
+          <!-- Criar Enquete -->
+          <section class="card create-section">
+            <h2>Criar Nova Enquete</h2>
+            <form id="createPollForm">
+              <div class="form-group">
+                <label for="pollTitle">Título da Enquete</label>
+                <input
+                  type="text"
+                  id="pollTitle"
+                  placeholder="Ex: Qual a melhor linguagem?"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Opções</label>
+                <div id="optionsContainer">
+                  <div class="option-row">
+                    <input
+                      type="text"
+                      class="option-input"
+                      placeholder="Opção 1"
+                      required
+                    />
+                    <label class="correct-option-label">
+                      <input type="radio" name="correctOption" value="0" />
+                      <span>Correta</span>
+                    </label>
+                  </div>
+                  <div class="option-row">
+                    <input
+                      type="text"
+                      class="option-input"
+                      placeholder="Opção 2"
+                      required
+                    />
+                    <label class="correct-option-label">
+                      <input type="radio" name="correctOption" value="1" />
+                      <span>Correta</span>
+                    </label>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="addOptionBtn"
+                >
+                  + Adicionar Opção
+                </button>
+              </div>
+              <div class="form-group">
+                <label for="pollEndDate">Data de Encerramento (Opcional)</label>
+                <input type="datetime-local" id="pollEndDate" />
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Criar Enquete
+              </button>
+            </form>
+          </section>
+
+          <!-- Lista de Enquetes -->
+          <section class="card polls-section">
+            <div class="polls-header">
+              <h2>Enquetes Ativas</h2>
+              <button class="btn btn-ghost" id="refreshBtn">↻ Atualizar</button>
+            </div>
+            <div id="pollsList" class="polls-list">
+              <p class="empty-state">Nenhuma enquete ativa. Crie uma acima!</p>
+            </div>
+          </section>
+        </main>
+      </div>
 
       <!-- Toast de notificações -->
       <div id="toastContainer" class="toast-container"></div>

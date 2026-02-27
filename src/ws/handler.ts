@@ -1,5 +1,6 @@
 import type { WebSocketHandler } from "bun";
 import { pollService } from "../polls/poll.service";
+import { userStore } from "../users/user.store";
 import { validateCreatePoll, validateVote } from "../validators/poll.validator";
 
 export interface WsData {
@@ -45,6 +46,10 @@ export const wsHandler: WebSocketHandler<WsData> = {
           break;
         default:
           console.log("Tipo de mensagem desconhecido:", payload.type);
+          break;
+        case "GET_RANKING":
+          const ranking = await userStore.getRanking();
+          ws.send(JSON.stringify({ type: "RANKING_LIST", data: ranking }))
           break;
       }
     } catch (error) {

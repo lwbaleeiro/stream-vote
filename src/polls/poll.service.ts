@@ -1,5 +1,6 @@
 import { pollStore } from "./poll.store";
 import { userStore } from "../users/user.store";
+import { bus } from "../events";
 import type { Poll } from "./poll.model";
 import type { User } from "../users/user.model";
 
@@ -46,8 +47,13 @@ class PollService {
     if (optionIndex === undefined || optionIndex === null) throw new Error("Parametro optionIndex deve ser informado");
 
     const poll = await pollStore.getById(pollId);
-
     if (!poll) throw new Error("Enquete não encontrada")
+
+    const isExpired = poll.endDate && new Date(poll.endDate) <= new Date();
+    if (!poll.isActive || isExpired) {
+      throw new Error("Esta enquete já está encerrada.");
+    }
+
     if (!poll.options[optionIndex]) throw new Error("Opção de voto invalida.")
     if (await pollStore.hasVoted(pollId, userId)) throw new Error("Usuário já votou para essa enquete.");
 
@@ -79,6 +85,33 @@ class PollService {
 
     const winningUsers = await pollStore.winningUsers(pollId, correctAwnser);
     await addScore(winningUsers);
+    const ranking = await userStore.getRanking();
+
+    bus.emit("ranking_changed", ranking);
+    bus.emit("poll_closed", poll);
+  }
+
+  async checkExpiredPolls() {
+    const polls = await pollStore.getAll();
+    const now = new Date();
+
+    for (const poll of polls) {
+      if (poll.isActive && poll.endDate && poll.endDate <= now) {
+        console.log(`Encerrando enquete expirada automaticamente: ${poll.title}`);
+        
+        // Encontrar a opção correta (marcada na criação)
+        const correctIndex = poll.options.findIndex(opt => opt.isCorrect);
+        
+        // Se não houver opção correta marcada, simplesmente encerramos sem pontos
+        if (correctIndex !== -1) {
+          await this.closePolls(poll.id, correctIndex);
+        } else {
+          poll.isActive = false;
+          await pollStore.save(poll);
+          bus.emit("poll_closed", poll);
+        }
+      }
+    }
   }
 }
 
