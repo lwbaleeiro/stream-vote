@@ -95,6 +95,8 @@ class PollService {
     await addScore(winningUsers);
     const ranking = await userStore.getRanking();
 
+    poll.winnersCount = winningUsers.length;
+
     bus.emit("ranking_changed", ranking);
     bus.emit("poll_closed", poll);
   }
@@ -120,6 +122,22 @@ class PollService {
         }
       }
     }
+  }
+
+  async getInactivePolls() {
+    const inactivePolls = (await pollStore.getAll()).filter(poll => poll.isActive === false);
+
+    for (const poll of inactivePolls) {
+      //if (poll.winnersCount === undefined) {
+      const correctIndex = poll.options.findIndex(opt => opt.isCorrect);
+      const winningUsers = await pollStore.winningUsers(poll.id, correctIndex);
+        
+        poll.winnersCount = winningUsers.length;
+        //await pollStore.save(poll); TODO: SALVAR NO BANCO DEPOIS
+      //}
+    }
+    
+    return inactivePolls;
   }
 }
 

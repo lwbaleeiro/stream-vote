@@ -21,6 +21,9 @@
             <span id="usernameDisplay"></span>
             <button class="btn btn-ghost btn-sm" id="logoutBtn">Sair</button>
           </div>
+          <div id="guestProfile" class="user-profile">
+            <button class="btn btn-primary btn-sm" id="showAuthBtn">Entrar / Cadastrar</button>
+          </div>
           <div class="connection-status" id="connectionStatus">
             <span class="status-dot"></span>
             <span class="status-text">Desconectado</span>
@@ -28,9 +31,12 @@
         </div>
       </header>
 
-      <!-- Seção de Autenticação -->
-      <section id="authSection" class="card auth-section">
-        <h2 id="authTitle">Entrar ou Cadastrar</h2>
+      <!-- Seção de Autenticação (Agora Oculta por padrão) -->
+      <section id="authSection" class="card auth-section hidden-toggle">
+        <div class="section-header-compact">
+          <h2 id="authTitle">Acesso</h2>
+          <button class="btn-close" id="closeAuthBtn">✕</button>
+        </div>
         <form id="authForm">
           <div class="form-group">
             <label for="username">Usuário</label>
@@ -72,10 +78,13 @@
           </div>
         </aside>
 
-        <main class="main hidden" id="mainContent">
-          <!-- Criar Enquete -->
-          <section class="card create-section">
-            <h2>Criar Nova Enquete</h2>
+        <main class="main" id="mainContent"> <!-- Removido hidden para permitir carregar visitor -->
+          <!-- Criar Enquete (Agora Oculto por padrão) -->
+          <section id="createPollSection" class="card create-section hidden-toggle">
+            <div class="section-header-compact">
+              <h2>Criar Nova Enquete</h2>
+              <button class="btn-close" id="closeCreateBtn">✕</button>
+            </div>
             <form id="createPollForm">
               <div class="form-group">
                 <label for="pollTitle">Título da Enquete</label>
@@ -135,11 +144,36 @@
           <!-- Lista de Enquetes -->
           <section class="card polls-section">
             <div class="polls-header">
-              <h2>Enquetes Ativas</h2>
+              <div class="title-with-badge">
+                <h2>Enquetes Ativas</h2>
+                <button class="btn btn-accent btn-sm" id="showCreatePollBtn">+ Nova Enquete</button>
+              </div>
               <button class="btn btn-ghost" id="refreshBtn">↻ Atualizar</button>
             </div>
-            <div id="pollsList" class="polls-list">
-              <p class="empty-state">Nenhuma enquete ativa. Crie uma acima!</p>
+            <div class="carousel-wrapper">
+              <button class="carousel-nav prev" id="prevActive">❮</button>
+              <div id="pollsList" class="polls-list carousel-container">
+                <p class="empty-state">
+                  Nenhuma enquete ativa. Crie uma acima!
+                </p>
+              </div>
+              <button class="carousel-nav next" id="nextActive">❯</button>
+              <div class="carousel-dots" id="dotsActive"></div>
+            </div>
+          </section>
+
+          <!-- Enquetes Encerradas -->
+          <section class="card inactive-polls-section">
+            <div class="polls-header">
+              <h2>Histórico de Enquetes</h2>
+            </div>
+            <div class="carousel-wrapper">
+              <button class="carousel-nav prev" id="prevInactive">❮</button>
+              <div id="inactivePollsList" class="polls-list carousel-container">
+                <p class="empty-state">Nenhuma enquete encerrada ainda.</p>
+              </div>
+              <button class="carousel-nav next" id="nextInactive">❯</button>
+              <div class="carousel-dots" id="dotsInactive"></div>
             </div>
           </section>
         </main>

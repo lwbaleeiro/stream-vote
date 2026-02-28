@@ -1,6 +1,7 @@
 // ===== State =====
 let ws = null;
 const polls = new Map();
+const inactivePolls = new Map();
 const user = {
     id: localStorage.getItem("streamVote_userId"),
     username: localStorage.getItem("streamVote_username")
@@ -9,6 +10,7 @@ const user = {
 // ===== DOM Elements =====
 const statusEl = document.getElementById("connectionStatus");
 const pollsList = document.getElementById("pollsList");
+const inactivePollsList = document.getElementById("inactivePollsList");
 const form = document.getElementById("createPollForm");
 const optionsContainer = document.getElementById("optionsContainer");
 const addOptionBtn = document.getElementById("addOptionBtn");
@@ -19,11 +21,19 @@ const authSection = document.getElementById("authSection");
 const mainContent = document.getElementById("mainContent");
 const authForm = document.getElementById("authForm");
 const userProfile = document.getElementById("userProfile");
+const guestProfile = document.getElementById("guestProfile");
 const usernameDisplay = document.getElementById("usernameDisplay");
 const logoutBtn = document.getElementById("logoutBtn");
 const registerBtn = document.getElementById("registerBtn");
+const showAuthBtn = document.getElementById("showAuthBtn");
+const closeAuthBtn = document.getElementById("closeAuthBtn");
+
 const rankingSidebar = document.getElementById("rankingSidebar");
 const rankingList = document.getElementById("rankingList");
+
+const createPollSection = document.getElementById("createPollSection");
+const showCreatePollBtn = document.getElementById("showCreatePollBtn");
+const closeCreateBtn = document.getElementById("closeCreateBtn");
 
 // ===== Initialization =====
 function init() {
@@ -31,23 +41,25 @@ function init() {
         showMainContent();
         connectWebSocket();
     } else {
-        showAuthContent();
+        showGuestContent();
     }
 }
 
 function showMainContent() {
-    authSection.classList.add("hidden");
+    authSection.classList.add("hidden-toggle");
+    authSection.classList.remove("active");
     mainContent.classList.remove("hidden");
     rankingSidebar.classList.remove("hidden");
     userProfile.classList.remove("hidden");
+    guestProfile.classList.add("hidden");
     usernameDisplay.textContent = `Hi, ${user.username}`;
 }
 
-function showAuthContent() {
-    authSection.classList.remove("hidden");
-    mainContent.classList.add("hidden");
-    rankingSidebar.classList.add("hidden");
+function showGuestContent() {
+    mainContent.classList.remove("hidden"); // Allow visitors to see polls
+    rankingSidebar.classList.remove("hidden");
     userProfile.classList.add("hidden");
+    guestProfile.classList.remove("hidden");
 }
 
 // ===== WebSocket Connection =====
@@ -62,6 +74,7 @@ function connectWebSocket() {
         statusEl.querySelector(".status-text").textContent = "Conectado";
         showToast("Conectado ao servidor!", "success");
         ws.send(JSON.stringify({ type: "GET_POLLS" }));
+        ws.send(JSON.stringify({ type: "GET_INACTIVE_POLLS" }));
         ws.send(JSON.stringify({ type: "GET_RANKING" }));
     });
 
@@ -86,12 +99,23 @@ function handleWsMessage(payload) {
             showToast(`Enquete "${payload.data.title}" criada!`, "success");
             break;
         case "POLL_UPDATED":
-            polls.set(payload.data.id, payload.data);
+            if (payload.data.isActive) {
+                polls.set(payload.data.id, payload.data);
+                inactivePolls.delete(payload.data.id);
+            } else {
+                inactivePolls.set(payload.data.id, payload.data);
+                polls.delete(payload.data.id);
+            }
             renderPolls();
             break;
         case "POLLS_LIST":
             polls.clear();
             payload.data.forEach(p => polls.set(p.id, p));
+            renderPolls();
+            break;
+        case "INACTIVE_POLLS_LIST":
+            inactivePolls.clear();
+            payload.data.forEach(p => inactivePolls.set(p.id, p));
             renderPolls();
             break;
         case "RANKING_LIST":
@@ -103,6 +127,32 @@ function handleWsMessage(payload) {
             break;
     }
 }
+
+// ===== UI Handlers =====
+showAuthBtn.addEventListener("click", () => {
+    if (user.id) {
+        showToast("Você já está logado!", "info");
+        return;
+    }
+    authSection.classList.add("active");
+});
+
+closeAuthBtn.addEventListener("click", () => {
+    authSection.classList.remove("active");
+});
+
+showCreatePollBtn.addEventListener("click", () => {
+    if (!user.id) {
+        showToast("Faça login para criar uma enquete.", "error");
+        authSection.classList.add("active");
+        return;
+    }
+    createPollSection.classList.toggle("active");
+});
+
+closeCreateBtn.addEventListener("click", () => {
+    createPollSection.classList.remove("active");
+});
 
 // ===== Auth Handlers =====
 authForm.addEventListener("submit", async (e) => {
@@ -256,50 +306,136 @@ function vote(pollId, optionIndex) {
     ws.send(JSON.stringify({ type: "VOTE", data: { pollId, optionIndex } }));
 }
 
-function renderPolls() {
-    if (polls.size === 0) {
-        pollsList.innerHTML = '<p class="empty-state">Nenhuma enquete ativa. Crie uma acima!</p>';
-        return;
+// ===== Carousel Logic =====
+function initCarousel(containerId, dotsId, prevId, nextId) {
+    const container = document.getElementById(containerId);
+    const dotsContainer = document.getElementById(dotsId);
+    const prevBtn = document.getElementById(prevId);
+    const nextBtn = document.getElementById(nextId);
+
+    if (!container || !dotsContainer) return;
+
+    const cards = container.querySelectorAll(".poll-item");
+    
+    // Update dots
+    dotsContainer.innerHTML = "";
+    cards.forEach((_, index) => {
+        const dot = document.createElement("div");
+        dot.className = `dot ${index === 0 ? "active" : ""}`;
+        dot.onclick = () => {
+            container.scrollTo({
+                left: index * (320 + 24), // card width + gap
+                behavior: "smooth"
+            });
+        };
+        dotsContainer.appendChild(dot);
+    });
+
+    const updateActiveDot = () => {
+        const scrollLeft = container.scrollLeft;
+        const cardWidth = 320 + 24;
+        const activeIndex = Math.round(scrollLeft / cardWidth);
+        
+        const dots = dotsContainer.querySelectorAll(".dot");
+        dots.forEach((dot, i) => {
+            dot.classList.toggle("active", i === activeIndex);
+        });
+    };
+
+    container.onscroll = updateActiveDot;
+
+    if (prevBtn) {
+        prevBtn.onclick = () => {
+            container.scrollBy({ left: -(320 + 24), behavior: "smooth" });
+        };
     }
 
-    pollsList.innerHTML = "";
-    polls.forEach((poll) => {
-        const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-        const isExpired = poll.endDate && new Date(poll.endDate) <= new Date();
-        const showResults = !poll.isActive || isExpired;
+    if (nextBtn) {
+        nextBtn.onclick = () => {
+            container.scrollBy({ left: 320 + 24, behavior: "smooth" });
+        };
+    }
+}
 
-        const optionsHtml = poll.options.map((opt) => {
-            const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
-            const isCorrectClass = (showResults && opt.isCorrect) ? "is-correct" : "";
-            const correctBadge = (showResults && opt.isCorrect) ? ' <span class="correct-badge">✓</span>' : "";
-            const disabledClass = showResults ? "disabled" : "";
-            
-            return `
-                <div class="poll-option ${isCorrectClass} ${disabledClass}" onclick="vote('${poll.id}', ${opt.index})">
-                    <div class="option-bar" style="width: ${percentage}%"></div>
-                    <span class="option-text">${escapeHtml(opt.text)}${correctBadge}</span>
-                    <span class="option-votes">${opt.votes} (${percentage}%)</span>
-                </div>
-            `;
-        }).join("");
+function renderPolls() {
+    // Render Active Polls
+    if (polls.size === 0) {
+        pollsList.innerHTML = '<p class="empty-state">Nenhuma enquete ativa. Crie uma acima!</p>';
+    } else {
+        pollsList.innerHTML = "";
+        Array.from(polls.values())
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .forEach(poll => pollsList.appendChild(createPollElement(poll)));
+    }
 
-        const pollEl = document.createElement("div");
-        const pollExpiredClass = showResults ? "poll-expired" : "";
-        pollEl.className = `poll-item ${pollExpiredClass}`;
+    // Render Inactive Polls
+    if (!inactivePollsList) return; 
+    
+    if (inactivePolls.size === 0) {
+        inactivePollsList.innerHTML = '<p class="empty-state">Nenhuma enquete encerrada ainda.</p>';
+    } else {
+        inactivePollsList.innerHTML = "";
+        Array.from(inactivePolls.values())
+            .sort((a, b) => new Date(b.endDate) - new Date(a.endDate))
+            .forEach(poll => inactivePollsList.appendChild(createPollElement(poll)));
+    }
+
+    // Initialize/Update Carousels
+    initCarousel("pollsList", "dotsActive", "prevActive", "nextActive");
+    initCarousel("inactivePollsList", "dotsInactive", "prevInactive", "nextInactive");
+}
+
+function createPollElement(poll) {
+    const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    const isExpired = poll.endDate && new Date(poll.endDate) <= new Date();
+    const isInactive = !poll.isActive || isExpired;
+
+    const optionsHtml = poll.options.map((opt) => {
+        const percentage = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+        const isCorrectClass = (isInactive && opt.isCorrect) ? "is-correct" : "";
+        const correctBadge = (isInactive && opt.isCorrect) ? ' <span class="correct-badge">✓</span>' : "";
+        const disabledClass = isInactive ? "disabled" : "";
         
-        const endDateTime = poll.endDate ? new Date(poll.endDate).toLocaleString("pt-BR") : "Sem prazo";
-        const statusText = showResults ? ' <span class="status-expired">(Encerrada)</span>' : "";
-        
-        pollEl.innerHTML = `
+        return `
+            <div class="poll-option ${isCorrectClass} ${disabledClass}" ${!isInactive ? `onclick="vote('${poll.id}', ${opt.index})"` : ""}>
+                <div class="option-bar" style="width: ${percentage}%"></div>
+                <span class="option-text">${escapeHtml(opt.text)}${correctBadge}</span>
+                <span class="option-votes">${opt.votes} (${percentage}%)</span>
+            </div>
+        `;
+    }).join("");
+
+    const pollEl = document.createElement("div");
+    const pollStatusClass = isInactive ? "poll-expired" : "";
+    pollEl.className = `poll-item ${pollStatusClass}`;
+    
+    const endDateTime = poll.endDate ? new Date(poll.endDate).toLocaleString("pt-BR") : "Sem prazo";
+    const statusText = isInactive ? ' <span class="status-expired">(Encerrada)</span>' : "";
+    
+    const winnersHtml = (isInactive && poll.winnersCount !== undefined) ? 
+        `<span class="winners-count">🏆 ${poll.winnersCount} ganhadores</span>` : "";
+
+    // Decorative icon based on title or random
+    const icons = ["📊", "🗳️", "📈", "🔥", "✨"];
+    const randomIcon = icons[poll.id.charCodeAt(0) % icons.length];
+
+    pollEl.innerHTML = `
+        <div class="poll-card-header">
+            <span style="font-size: 3rem; z-index: 1;">${randomIcon}</span>
+        </div>
+        <div class="poll-card-content">
             <h3>${escapeHtml(poll.title)}${statusText}</h3>
             <div class="poll-options">${optionsHtml}</div>
             <div class="poll-meta">
-                <span>Total: ${totalVotes} voto${totalVotes !== 1 ? "s" : ""}</span>
-                <span>Fim: ${endDateTime}</span>
+                <div class="poll-stats">
+                    <div style="margin-bottom: 4px;"><strong>Total:</strong> ${totalVotes} votos</div>
+                    <div style="font-size: 0.7rem; opacity: 0.7;"><strong>Fim:</strong> ${endDateTime}</div>
+                </div>
+                ${winnersHtml}
             </div>
-        `;
-        pollsList.appendChild(pollEl);
-    });
+        </div>
+    `;
+    return pollEl;
 }
 
 function renderRanking(users) {

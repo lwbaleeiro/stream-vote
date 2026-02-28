@@ -99,6 +99,6 @@ pool-system/
 - [x] Testes básicos
 - [x] Persistência (SQLite/arquivo)
 - [x] Frontend simples (HTML + JS)
-- [ ] Um item correto obrigatório
+- [x] Um item correto obrigatório
 - [ ] Lista de enquetes inativas e quantidade de ganhadores.
 - [ ] Criar enquete baseada em evento (api de esportes).

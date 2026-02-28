@@ -11,5 +11,6 @@ export interface Poll {
     options: PollOption[];
     createdAt: Date;
     isActive: boolean;
-    endDate: Date; 
+    endDate: Date;
+    winnersCount?: number;
 }

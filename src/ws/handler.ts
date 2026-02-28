@@ -39,11 +39,19 @@ export const wsHandler: WebSocketHandler<WsData> = {
           break;
         case "GET_POLLS":
           const pollsList = await pollService.getPolls();
+  
 
           ws.send(JSON.stringify({ type: "POLLS_LIST", data: pollsList }));
 
           console.log("Retornado list de polls ativas.");
           break;
+        case "GET_INACTIVE_POLLS":
+          const inactivePolls = await pollService.getInactivePolls();
+
+          ws.send(JSON.stringify({ type: "INACTIVE_POLLS_LIST", data: inactivePolls }));
+
+          console.log("Retornado list de polls inativas.");
+          break;          
         default:
           console.log("Tipo de mensagem desconhecido:", payload.type);
           break;
