@@ -7,10 +7,7 @@
     <link rel="stylesheet" href="/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div class="app">
@@ -32,7 +29,7 @@
             <button class="btn btn-ghost btn-sm" id="logoutBtn">Logout</button>
           </div>
           <div id="guestProfile" class="user-profile">
-            <button class="btn btn-primary btn-sm" id="showAuthBtn">Login / Register</button>
+            <button class="btn btn-accent btn-sm" id="showAuthBtn">Login / Register</button>
           </div>
           <div class="connection-status" id="connectionStatus">
             <span class="status-dot"></span>
@@ -41,47 +38,31 @@
         </div>
       </header>
 
-      <!-- Seção de Autenticação (Agora Oculta por padrão) -->
       <section id="authSection" class="card auth-section hidden-toggle">
         <div class="section-header-compact">
           <h2 id="authTitle">Access</h2>
           <button class="btn-close" id="closeAuthBtn">✕</button>
         </div>
         <div class="disclaimer">
-          <p>⚠️ <strong>Important:</strong> This is a study project. Please <strong>do not use</strong> real-world passwords or sensitive data.</p>
+          <p>⚠️ <strong>Important:</strong> This is a study project. Do <strong>not</strong> use real passwords.</p>
         </div>
         <form id="authForm">
           <div class="form-group">
             <label for="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              placeholder="Your nickname"
-              required
-            />
+            <input type="text" id="username" placeholder="Your nickname" required />
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              placeholder="Your password"
-              required
-            />
+            <input type="password" id="password" placeholder="Your password" required />
           </div>
           <div class="auth-buttons">
-            <button type="submit" class="btn btn-primary" id="loginBtn">
-              Login
-            </button>
-            <button type="button" class="btn btn-ghost" id="registerBtn">
-              Create Account
-            </button>
+            <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
+            <button type="button" class="btn btn-ghost" id="registerBtn">Create Account</button>
           </div>
         </form>
       </section>
 
       <div class="layout-container">
-        <!-- Sidebar Ranking -->
         <aside id="rankingSidebar" class="ranking-sidebar hidden">
           <div class="card ranking-card">
             <h2>🏆 Ranking</h2>
@@ -91,8 +72,7 @@
           </div>
         </aside>
 
-        <main class="main" id="mainContent"> <!-- Removido hidden para permitir carregar visitor -->
-          <!-- Criar Enquete (Agora Oculto por padrão) -->
+        <main class="main" id="mainContent">
           <section id="createPollSection" class="card create-section hidden-toggle">
             <div class="section-header-compact">
               <h2>Create New Poll</h2>
@@ -101,88 +81,59 @@
             <form id="createPollForm">
               <div class="form-group">
                 <label for="pollTitle">Poll Title</label>
-                <input
-                  type="text"
-                  id="pollTitle"
-                  placeholder="Ex: What is the best language?"
-                  required
-                />
+                <input type="text" id="pollTitle" placeholder="Ex: What is the best language?" required />
               </div>
               <div class="form-group">
                 <label>Options</label>
                 <div id="optionsContainer">
                   <div class="option-row">
-                    <input
-                      type="text"
-                      class="option-input"
-                      placeholder="Option 1"
-                      required
-                    />
+                    <input type="text" class="option-input" placeholder="Option 1" required />
                     <label class="correct-option-label">
-                      <input type="radio" name="correctOption" value="0" />
-                      <span>Correct</span>
+                      <input type="radio" name="correctOption" value="0" /><span>Correct</span>
                     </label>
                   </div>
                   <div class="option-row">
-                    <input
-                      type="text"
-                      class="option-input"
-                      placeholder="Option 2"
-                      required
-                    />
+                    <input type="text" class="option-input" placeholder="Option 2" required />
                     <label class="correct-option-label">
-                      <input type="radio" name="correctOption" value="1" />
-                      <span>Correct</span>
+                      <input type="radio" name="correctOption" value="1" /><span>Correct</span>
                     </label>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  id="addOptionBtn"
-                >
-                  + Add Option
-                </button>
+                <button type="button" class="btn btn-secondary" id="addOptionBtn">+ Add Option</button>
               </div>
               <div class="form-group">
                 <label for="pollEndDate">End Date (Optional)</label>
                 <input type="datetime-local" id="pollEndDate" />
               </div>
-              <button type="submit" class="btn btn-primary">
-                Create Poll
-              </button>
+              <button type="submit" class="btn btn-primary">Create Poll</button>
             </form>
           </section>
 
-          <!-- Polls List -->
           <section class="card polls-section">
             <div class="polls-header">
               <div class="title-with-badge">
                 <h2>Active Polls</h2>
                 <button class="btn btn-accent btn-sm" id="showCreatePollBtn">+ New Poll</button>
               </div>
-              <button class="btn btn-ghost" id="refreshBtn">↻ Refresh</button>
+              <button class="btn btn-ghost btn-sm" id="refreshBtn">↻ Refresh</button>
             </div>
             <div class="carousel-wrapper">
               <button class="carousel-nav prev" id="prevActive">❮</button>
-              <div id="pollsList" class="polls-list carousel-container">
-                <p class="empty-state">
-                  No active polls. Create one above!
-                </p>
+              <div id="pollsList" class="carousel-container">
+                <p class="empty-state">No active polls. Create one above!</p>
               </div>
               <button class="carousel-nav next" id="nextActive">❯</button>
               <div class="carousel-dots" id="dotsActive"></div>
             </div>
           </section>
 
-          <!-- Inactive Polls -->
           <section class="card inactive-polls-section">
             <div class="polls-header">
               <h2>Poll History</h2>
             </div>
             <div class="carousel-wrapper">
               <button class="carousel-nav prev" id="prevInactive">❮</button>
-              <div id="inactivePollsList" class="polls-list carousel-container">
+              <div id="inactivePollsList" class="carousel-container">
                 <p class="empty-state">No finished polls yet.</p>
               </div>
               <button class="carousel-nav next" id="nextInactive">❯</button>
@@ -192,10 +143,8 @@
         </main>
       </div>
 
-      <!-- Toast de notificações -->
       <div id="toastContainer" class="toast-container"></div>
     </div>
-
     <script src="/app.js"></script>
   </body>
 </html>
