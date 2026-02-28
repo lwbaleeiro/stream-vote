@@ -316,43 +316,73 @@ function initCarousel(containerId, dotsId, prevId, nextId) {
     if (!container || !dotsContainer) return;
 
     const cards = container.querySelectorAll(".poll-item");
+    if (cards.length === 0) {
+        if (prevBtn) prevBtn.style.display = "none";
+        if (nextBtn) nextBtn.style.display = "none";
+        dotsContainer.innerHTML = "";
+        return;
+    }
+
+    const getVisibleCardsCount = () => {
+        if (window.innerWidth <= 900) return 1;
+        if (window.innerWidth <= 1200) return 2;
+        return 3;
+    };
+
+    const visibleCount = getVisibleCardsCount();
+    const pageCount = Math.ceil(cards.length / visibleCount);
     
     // Update dots
     dotsContainer.innerHTML = "";
-    cards.forEach((_, index) => {
-        const dot = document.createElement("div");
-        dot.className = `dot ${index === 0 ? "active" : ""}`;
-        dot.onclick = () => {
-            container.scrollTo({
-                left: index * (320 + 24), // card width + gap
-                behavior: "smooth"
-            });
-        };
-        dotsContainer.appendChild(dot);
-    });
+    if (pageCount > 1) {
+        for (let i = 0; i < pageCount; i++) {
+            const dot = document.createElement("div");
+            dot.className = `dot ${i === 0 ? "active" : ""}`;
+            dot.onclick = () => {
+                const scrollAmount = i * container.clientWidth;
+                container.scrollTo({
+                    left: scrollAmount,
+                    behavior: "smooth"
+                });
+            };
+            dotsContainer.appendChild(dot);
+        }
+    }
 
-    const updateActiveDot = () => {
+    const updateUI = () => {
         const scrollLeft = container.scrollLeft;
-        const cardWidth = 320 + 24;
-        const activeIndex = Math.round(scrollLeft / cardWidth);
+        const containerWidth = container.clientWidth;
+        const activePage = Math.round(scrollLeft / containerWidth);
         
         const dots = dotsContainer.querySelectorAll(".dot");
         dots.forEach((dot, i) => {
-            dot.classList.toggle("active", i === activeIndex);
+            dot.classList.toggle("active", i === activePage);
         });
+
+        if (prevBtn) prevBtn.disabled = scrollLeft <= 5;
+        if (nextBtn) nextBtn.disabled = scrollLeft + containerWidth >= container.scrollWidth - 5;
+
+        // Hide arrows if everything fits
+        const shouldShowArrows = container.scrollWidth > containerWidth + 5;
+        if (prevBtn) prevBtn.style.display = shouldShowArrows ? "flex" : "none";
+        if (nextBtn) nextBtn.style.display = shouldShowArrows ? "flex" : "none";
     };
 
-    container.onscroll = updateActiveDot;
+    container.onscroll = updateUI;
+    window.addEventListener("resize", updateUI);
+    
+    // Initial UI update
+    setTimeout(updateUI, 100);
 
     if (prevBtn) {
         prevBtn.onclick = () => {
-            container.scrollBy({ left: -(320 + 24), behavior: "smooth" });
+            container.scrollBy({ left: -container.clientWidth, behavior: "smooth" });
         };
     }
 
     if (nextBtn) {
         nextBtn.onclick = () => {
-            container.scrollBy({ left: 320 + 24, behavior: "smooth" });
+            container.scrollBy({ left: container.clientWidth, behavior: "smooth" });
         };
     }
 }

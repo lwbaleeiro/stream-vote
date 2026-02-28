@@ -65,7 +65,7 @@ class PollService {
     if (!poll.options[optionIndex]) throw new Error("Invalid vote option.")
     if (await pollStore.hasVoted(pollId, userId)) throw new Error("User has already voted in this poll.");
 
-    pollStore.registreVote(pollId, userId, optionIndex);
+    await pollStore.registreVote(pollId, userId, optionIndex);
     poll.options[optionIndex].votes++;
   
     await pollStore.save(poll);

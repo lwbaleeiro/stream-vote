@@ -7,7 +7,7 @@ class UserStore {
 
     async save(user: User): Promise<void> {
 
-        db.insert(schema.users).values({
+        await db.insert(schema.users).values({
             id: user.id,
             username: user.username,
             passwordHash: user.passwordHash,
@@ -22,7 +22,7 @@ class UserStore {
 
     async getByUsername(username: string): Promise<User | undefined> {
         
-        const result = db.select()
+        const result = await db.select()
             .from(schema.users)
             .where(eq(schema.users.username, username))
             .get();
@@ -36,22 +36,22 @@ class UserStore {
         }
     }
 
-    clear() {
-        db.delete(schema.users).run();
+    async clear(): Promise<void> {
+        await db.delete(schema.users).run();
     }
 
     async addScore(userId: string, points: number): Promise<void> {
-        const user = db.select().from(schema.users).where(eq(schema.users.id, userId)).get();
+        const user = await db.select().from(schema.users).where(eq(schema.users.id, userId)).get();
         if (!user) return;
         
-        db.update(schema.users)
+        await db.update(schema.users)
             .set({ score: user.score + points })
             .where(eq(schema.users.id, userId))
             .run();
     }
 
     async getRanking(limit: number = 10) {
-        return db.select()
+        return await db.select()
             .from(schema.users)
             .orderBy(desc(schema.users.score))
             .limit(limit)

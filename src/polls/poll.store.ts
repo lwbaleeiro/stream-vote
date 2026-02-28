@@ -8,7 +8,7 @@ class PollStore {
 
     async save(poll: Poll): Promise<void> {
 
-        db.insert(schema.polls).values({ 
+        await db.insert(schema.polls).values({ 
             id: poll.id, 
             title: poll.title, 
             createdAt: poll.createdAt.toISOString(), 
@@ -19,7 +19,7 @@ class PollStore {
             set: { isActive: poll.isActive, title: poll.title } 
         }).run();
 
-        poll.options.forEach(
+        const optionPromises = poll.options.map(
             opt => db.insert(schema.options).values({ 
                 pollId: poll.id, 
                 idx: opt.index, 
@@ -32,18 +32,20 @@ class PollStore {
             })
             .run()
         );
+
+        await Promise.all(optionPromises);
     }
 
     async getById(id: string): Promise<Poll | undefined> {
 
-        const result = db.select()
+        const result = await db.select()
             .from(schema.polls)
             .where(eq(schema.polls.id, id))
             .get();
 
         if (!result) return undefined;
 
-        const optionsRows = db.select()
+        const optionsRows = await db.select()
             .from(schema.options)
             .where(eq(schema.options.pollId, id))
             .all()
@@ -63,12 +65,12 @@ class PollStore {
 
     async getAll(): Promise<Poll[]> {
 
-        const pollRows = db.select()
+        const pollRows = await db.select()
             .from(schema.polls)
             .all();
 
-        return pollRows.map(row => {
-            const optionsRows = db.select()
+        const pollsWithOpts = await Promise.all(pollRows.map(async row => {
+            const optionsRows = await db.select()
                 .from(schema.options)
                 .where(eq(schema.options.pollId, row.id))
                 .all()
@@ -86,18 +88,20 @@ class PollStore {
                     isCorrect: opt.isCorrect
                 }))
             };
-        });
+        }));
+
+        return pollsWithOpts;
     }
 
-    clear(): void {
-        db.delete(schema.polls).run();
-        db.delete(schema.options).run();
-        db.delete(schema.votes).run();
+    async clear(): Promise<void> {
+        await db.delete(schema.polls).run();
+        await db.delete(schema.options).run();
+        await db.delete(schema.votes).run();
     }
 
     async registreVote(pollId: string, userId: string, optionIndex: number): Promise<void> {
 
-        db.insert(schema.votes).values({ 
+        await db.insert(schema.votes).values({ 
             pollId: pollId, 
             userId: userId, 
             optionIndex: 
@@ -107,7 +111,7 @@ class PollStore {
 
     async hasVoted(pollId: string, userId: string): Promise<boolean> {
         
-        const vote = db.select()
+        const vote = await db.select()
             .from(schema.votes)
             .where(and(eq(schema.votes.pollId, pollId), eq(schema.votes.userId, userId)))
             .get();
@@ -117,7 +121,7 @@ class PollStore {
 
     async winningUsers(pollId: string, optionIndex: number): Promise<User[]> {
         
-        const results = db.select({
+        const results = await db.select({
             user: schema.users
         })
         .from(schema.votes)

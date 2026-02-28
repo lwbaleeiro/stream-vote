@@ -4,9 +4,9 @@ import { userStore } from "./user.store";
 
 describe("User Service", () => {
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // tirar de prod
-    userStore.clear();
+    await userStore.clear();
   });
 
 

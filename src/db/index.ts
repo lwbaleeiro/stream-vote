@@ -1,10 +1,14 @@
-import { drizzle } from "drizzle-orm/bun-sqlite";
-import { Database } from "bun:sqlite";
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
 import * as schema from "./schemas";
 
-const sqlite = new Database("stream-vote.sqlite");
+const client = createClient({
+    url: process.env.TURSO_DATABASE_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN!,
+});
 
-sqlite.exec(`
+// Create tables if they don't exist (LibSQL style)
+await client.execute(`
     CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
@@ -13,7 +17,9 @@ sqlite.exec(`
         isActive INTEGER DEFAULT 1 NOT NULL,
         score INTEGER DEFAULT 0 NOT NULL
     );
+`);
 
+await client.execute(`
     CREATE TABLE IF NOT EXISTS polls (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
@@ -21,7 +27,9 @@ sqlite.exec(`
         isActive INTEGER DEFAULT 1 NOT NULL,
         endDate TEXT NOT NULL
     );
+`);
 
+await client.execute(`
     CREATE TABLE IF NOT EXISTS options (
         pollId TEXT NOT NULL,
         idx INTEGER NOT NULL,
@@ -31,7 +39,9 @@ sqlite.exec(`
         PRIMARY KEY (pollId, idx),
         FOREIGN KEY (pollId) REFERENCES polls(id) ON DELETE CASCADE
     );
+`);
 
+await client.execute(`
     CREATE TABLE IF NOT EXISTS votes (
         pollId TEXT NOT NULL,
         userId TEXT NOT NULL,
@@ -41,4 +51,4 @@ sqlite.exec(`
     );
 `);
 
-export const db = drizzle(sqlite, { schema });
+export const db = drizzle(client, { schema });

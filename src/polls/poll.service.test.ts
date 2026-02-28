@@ -4,9 +4,9 @@ import { pollStore } from "./poll.store";
 
 describe("Poll Service", () => {
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // tirar de prod
-    pollStore.clear();
+    await pollStore.clear();
   });
 
   test("Deve criar uma enquete com sucesso", async () => {
@@ -26,27 +26,27 @@ describe("Poll Service", () => {
 
   test("Deve lançar erro se não tiver opções", () => {
     expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca"], new Date('2199-01-01'), 0))
-      .rejects.toThrow("Uma enquete deve ter pelo menos 2 opções.");
+      .rejects.toThrow("A poll must have at least 2 options.");
   })
 
   test("Deve lançar erro se não tiver título", () => {
     expect(pollService.createPoll("", ["Paçoca", "Doce de Leite"], new Date('2199-01-01'), 0))
-      .rejects.toThrow("O título da enquete é obrigatório.");
+      .rejects.toThrow("Poll title is required.");
   })
 
   test("Deve lançar erro se tiver opções inválidas", () => {
     expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""], new Date('2199-01-01'), 0))
-      .rejects.toThrow("Todas as opções devem ter um texto válido.");
+      .rejects.toThrow("All options must have valid text.");
   })
 
   test("Deve lançar erro data invalida", () => {
     expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""], new Date('2199-13-45'), 0))
-      .rejects.toThrow("Data de encerramento da enquente é invalida.");
+      .rejects.toThrow("Invalid poll end date.");
   })
 
   test("Deve lançar erro se não tiver item correto", () => {
     expect(pollService.createPoll("Qual sua cor favorita?", ["Azul", "Verde"], new Date('2199-01-01'), undefined as any))
-      .rejects.toThrow("O item correto da votação é obrigatório.");
+      .rejects.toThrow("The correct item for the vote is required.");
   })
 
 
@@ -68,6 +68,6 @@ describe("Poll Service", () => {
 
     await pollService.vote(poll.id, userId, 1);
 
-    expect(pollService.vote(poll.id, userId, 1)).rejects.toThrow("Usuário já votou para essa enquete.")
+    expect(pollService.vote(poll.id, userId, 1)).rejects.toThrow("User has already voted in this poll.")
   })
 })

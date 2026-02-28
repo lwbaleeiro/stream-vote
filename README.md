@@ -1,12 +1,25 @@
-# Pool System — Real-Time Voting/Polls
+# Pool System — Real-Time Voting/Polls [WIP]
 
-A real-time polling system built with **TypeScript + Bun**, focused on learning:
+> A real-time polling system built with **TypeScript + Bun**
+
+## Check out the demo
+
+## Environment Variables
+
+Create a `.env` file in the root directory and add the following:
+
+```env
+TURSO_DATABASE_URL=libsql://your-db-name-user.turso.io
+TURSO_AUTH_TOKEN=your-auth-token
+```
+
+This project is a working in progress, but you can check out the demon on: stream-vote.onrender.com/
+
+## Features
 
 - **WebSockets** — Bidirectional real-time communication
 - **Shared State** — Managing data across multiple connections
 - **Validations** — Ensuring data integrity on the backend
-
-## Features
 
 | Feature      | Description                             |
 | ------------ | --------------------------------------- |
@@ -24,6 +37,32 @@ A real-time polling system built with **TypeScript + Bun**, focused on learning:
 - **Storage:** In-memory (Map) — Prepared for future persistence
 
 ## Getting Started
+
+1.
+
+```bash
+### Create Turso accout
+
+# install Turso CLI
+curl -sSfL https://get.tur.so/install.sh | bash
+
+# Login
+turso auth login
+
+# Create db
+turso db create stream-vote
+
+# get URL of DB
+turso db show stream-vote
+
+# Create access token
+turso db tokens create stream-vote
+
+# Create tables
+bun run src/server.ts
+```
+
+2.
 
 ```bash
 # Install dependencies

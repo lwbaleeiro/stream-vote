@@ -7,6 +7,11 @@
   box-sizing: border-box;
 }
 
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 :root {
   --bg-primary: #0f0f1a;
   --bg-secondary: #1a1a2e;
@@ -59,16 +64,40 @@ body {
   margin: 0;
 }
 .app {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1rem 2rem; /* Increased side padding */
+  width: 100%;
 }
 
 .layout-container {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 1.5rem;
+  display: flex;
+  gap: 2rem;
   align-items: start;
+}
+
+.ranking-sidebar {
+  flex: 0 0 280px;
+  position: sticky;
+  top: 1.5rem;
+}
+
+.main {
+  flex: 1;
+  min-width: 0; 
+}
+
+@media (max-width: 1300px) { /* Increased from 1200px */
+  .layout-container {
+    flex-direction: column;
+  }
+  
+  .ranking-sidebar {
+    width: 100%;
+    flex: none;
+    position: static;
+    margin-bottom: 2rem;
+  }
 }
 
 /* ===== Header ===== */
@@ -83,29 +112,43 @@ body {
 
 .logo-container {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
-.github-link {
-  color: var(--text-muted);
-  transition: color 0.2s, transform 0.2s;
-  display: flex;
-  align-items: center;
-}
-
-.github-link:hover {
-  color: var(--primary-color);
-  transform: scale(1.1);
-}
-
-.header h1 {
-  font-size: 1.5rem;
+.brand-info h1 {
+  font-size: 1.8rem;
   font-weight: 700;
   background: linear-gradient(135deg, var(--accent), #ff9a9e);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin-bottom: 0.3rem;
+}
+
+.github-promo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.github-link {
+  color: var(--text-muted);
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+}
+
+.github-link:hover {
+  color: white;
+  background: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px var(--accent-glow);
 }
 
 .header-actions {
@@ -396,7 +439,16 @@ input[type="password"]::placeholder {
   background: var(--accent);
   border-color: var(--accent);
   color: white;
-  cursor: default;
+}
+
+.card h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* ===== Polls ===== */
@@ -404,7 +456,9 @@ input[type="password"]::placeholder {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem; /* Increased spacing */
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .auth-buttons {
@@ -434,8 +488,9 @@ input[type="password"]::placeholder {
 /* ===== Carousel ===== */
 .carousel-wrapper {
   position: relative;
-  margin: 1rem 0;
-  padding: 0 2rem;
+  margin: 1.5rem 0;
+  padding: 0 50px; /* Space for arrows */
+  width: 100%;
 }
 
 .carousel-container {
@@ -445,21 +500,22 @@ input[type="password"]::placeholder {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
-  padding: 1rem 0.5rem;
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
+  padding: 1rem 0;
+  width: 100%;
 }
 
 .carousel-container::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 
 .carousel-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -471,13 +527,14 @@ input[type="password"]::placeholder {
   align-items: center;
   justify-content: center;
   transition: all var(--transition);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.carousel-nav:hover {
+.carousel-nav:hover:not(:disabled) {
   background: var(--accent);
   border-color: var(--accent);
   box-shadow: 0 0 15px var(--accent-glow);
+  color: white;
 }
 
 .carousel-nav.prev {
@@ -485,6 +542,12 @@ input[type="password"]::placeholder {
 }
 .carousel-nav.next {
   right: 0;
+}
+
+.carousel-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  filter: grayscale(1);
 }
 
 .carousel-dots {
@@ -510,19 +573,38 @@ input[type="password"]::placeholder {
 }
 
 .poll-item {
-  flex: 0 0 320px;
-  scroll-snap-align: center;
+  flex: 0 0 calc(33.333% - 1rem); /* 3 cards with 1.5rem gap (3rem total / 3 = 1rem each) */
+  scroll-snap-align: start;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 0; /* Remove padding to allow header to be flush */
+  padding: 0; 
   animation: fadeIn 0.3s ease;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-height: 380px;
+  min-height: 420px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   transition: transform var(--transition), box-shadow var(--transition);
+}
+
+@media (max-width: 1200px) {
+  /* Sidebar is on top now, so we have more room, but let's keep it responsive */
+  .poll-item {
+    flex: 0 0 calc(50% - 0.75rem); /* 2 cards */
+  }
+}
+
+@media (max-width: 900px) {
+  .poll-item {
+    flex: 0 0 100%; /* 1 card */
+  }
+  .carousel-wrapper {
+    padding: 0; 
+  }
+  .carousel-nav {
+    display: none;
+  }
 }
 
 .poll-item:hover {
