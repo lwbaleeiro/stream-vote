@@ -5,12 +5,12 @@ class UserService {
 
     async register(username: string, password: string) {
 
-        if (!username.trim()) throw new Error("O campo 'username' é obrigatório'!");
-        if (!password.trim()) throw new Error("O campo 'password' é obrigatório");
-        if (password.trim().length < 3) throw new Error("O campo 'password' deve conter ao menos 3 caracteres.");
+        if (!username.trim()) throw new Error("The 'username' field is required!");
+        if (!password.trim()) throw new Error("The 'password' field is required!");
+        if (password.trim().length < 3) throw new Error("The 'password' field must contain at least 3 characters.");
 
         const usernameTaken = await userStore.getByUsername(username);
-        if (usernameTaken) throw new Error("Esse 'username' já esta sendo utilizado.");
+        if (usernameTaken) throw new Error("This 'username' is already taken.");
 
         const user: User = {
             id: crypto.randomUUID(),
@@ -27,14 +27,14 @@ class UserService {
 
     async login(username: string, password: string) {
 
-        if (!username.trim()) throw new Error("O campo 'username' é obrigatório!");
-        if (!password.trim()) throw new Error("O campo 'password' é obrigatório!");
+        if (!username.trim()) throw new Error("The 'username' field is required!");
+        if (!password.trim()) throw new Error("The 'password' field is required!");
 
         const user = await userStore.getByUsername(username);
-        if (!user) throw new Error("Usuário não encontrado com esse username.")
+        if (!user) throw new Error("User not found with this username.")
 
         const isMatch = await Bun.password.verify(password, user.passwordHash);
-        if (!isMatch) throw new Error("Senha inválida!");
+        if (!isMatch) throw new Error("Invalid password!");
 
         return user.id;
     }

@@ -71,8 +71,8 @@ function connectWebSocket() {
 
     ws.addEventListener("open", () => {
         statusEl.classList.add("connected");
-        statusEl.querySelector(".status-text").textContent = "Conectado";
-        showToast("Conectado ao servidor!", "success");
+        statusEl.querySelector(".status-text").textContent = "Connected";
+        showToast("Connected to server!", "success");
         ws.send(JSON.stringify({ type: "GET_POLLS" }));
         ws.send(JSON.stringify({ type: "GET_INACTIVE_POLLS" }));
         ws.send(JSON.stringify({ type: "GET_RANKING" }));
@@ -80,9 +80,9 @@ function connectWebSocket() {
 
     ws.addEventListener("close", () => {
         statusEl.classList.remove("connected");
-        statusEl.querySelector(".status-text").textContent = "Desconectado";
-        showToast("Conexão perdida. Tentando reconectar...", "info");
-        setTimeout(init, 3000); // Tentar reconectar
+        statusEl.querySelector(".status-text").textContent = "Disconnected";
+        showToast("Connection lost. Trying to reconnect...", "info");
+        setTimeout(init, 3000); // Try to reconnect
     });
 
     ws.addEventListener("message", (event) => {
@@ -96,7 +96,7 @@ function handleWsMessage(payload) {
         case "POLL_CREATED":
             polls.set(payload.data.id, payload.data);
             renderPolls();
-            showToast(`Enquete "${payload.data.title}" criada!`, "success");
+            showToast(`Poll "${payload.data.title}" created!`, "success");
             break;
         case "POLL_UPDATED":
             if (payload.data.isActive) {
@@ -131,7 +131,7 @@ function handleWsMessage(payload) {
 // ===== UI Handlers =====
 showAuthBtn.addEventListener("click", () => {
     if (user.id) {
-        showToast("Você já está logado!", "info");
+        showToast("You are already logged in!", "info");
         return;
     }
     authSection.classList.add("active");
@@ -143,7 +143,7 @@ closeAuthBtn.addEventListener("click", () => {
 
 showCreatePollBtn.addEventListener("click", () => {
     if (!user.id) {
-        showToast("Faça login para criar uma enquete.", "error");
+        showToast("Please login to create a poll.", "info");
         authSection.classList.add("active");
         return;
     }
@@ -168,7 +168,7 @@ authForm.addEventListener("submit", async (e) => {
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Erro no login");
+        if (!res.ok) throw new Error(data.message || "Login error");
 
         user.id = data.userId;
         user.username = username;
@@ -177,7 +177,7 @@ authForm.addEventListener("submit", async (e) => {
         
         showMainContent();
         connectWebSocket();
-        showToast("Bem-vindo!", "success");
+        showToast("Welcome!", "success");
     } catch (err) {
         showToast(err.message, "error");
     }
@@ -188,7 +188,7 @@ registerBtn.addEventListener("click", async () => {
     const password = document.getElementById("password").value;
 
     if (!username || !password) {
-        showToast("Preencha usuário e senha.", "error");
+        showToast("Please fill in username and password.", "error");
         return;
     }
 
@@ -200,9 +200,9 @@ registerBtn.addEventListener("click", async () => {
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Erro no registro");
+        if (!res.ok) throw new Error(data.message || "Registration error");
 
-        showToast("Conta criada! Agora faça login.", "success");
+        showToast("Account created! Now please login.", "success");
     } catch (err) {
         showToast(err.message, "error");
     }
@@ -232,14 +232,14 @@ form.addEventListener("submit", (e) => {
         }
     });
 
-    if (options.length < 2) return showToast("Pelo menos 2 opções.", "error");
+    if (options.length < 2) return showToast("At least 2 options.", "error");
 
-    if (correctOptionIndex === null) return showToast("Selecione o item correto da votação.", "error");
+    if (correctOptionIndex === null) return showToast("Select the correct item for the poll.", "error");
 
     if (endDateInput) {
         const endDate = new Date(endDateInput);
         if (endDate <= new Date()) {
-            return showToast("A data de encerramento deve ser no futuro.", "error");
+            return showToast("The end date must be in the future.", "error");
         }
     }
 
@@ -258,17 +258,17 @@ form.addEventListener("submit", (e) => {
 function resetOptions() {
     optionsContainer.innerHTML = `
         <div class="option-row">
-            <input type="text" class="option-input" placeholder="Opção 1" required>
+            <input type="text" class="option-input" placeholder="Option 1" required>
             <label class="correct-option-label">
                 <input type="radio" name="correctOption" value="0">
-                <span>Correta</span>
+                <span>Correct</span>
             </label>
         </div>
         <div class="option-row">
-            <input type="text" class="option-input" placeholder="Opção 2" required>
+            <input type="text" class="option-input" placeholder="Option 2" required>
             <label class="correct-option-label">
                 <input type="radio" name="correctOption" value="1">
-                <span>Correta</span>
+                <span>Correct</span>
             </label>
         </div>
     `;
@@ -279,10 +279,10 @@ addOptionBtn.addEventListener("click", () => {
     const row = document.createElement("div");
     row.className = "option-row";
     row.innerHTML = `
-        <input type="text" class="option-input" placeholder="Opção ${count + 1}">
+        <input type="text" class="option-input" placeholder="Option ${count + 1}">
         <label class="correct-option-label">
             <input type="radio" name="correctOption" value="${count}">
-            <span>Correta</span>
+            <span>Correct</span>
         </label>
     `;
     optionsContainer.appendChild(row);
@@ -299,7 +299,7 @@ function vote(pollId, optionIndex) {
 
     const isExpired = poll.endDate && new Date(poll.endDate) <= new Date();
     if (!poll.isActive || isExpired) {
-        showToast("Esta enquete já está encerrada.", "error");
+        showToast("This poll is already closed.", "error");
         return;
     }
 
@@ -360,7 +360,7 @@ function initCarousel(containerId, dotsId, prevId, nextId) {
 function renderPolls() {
     // Render Active Polls
     if (polls.size === 0) {
-        pollsList.innerHTML = '<p class="empty-state">Nenhuma enquete ativa. Crie uma acima!</p>';
+        pollsList.innerHTML = '<p class="empty-state">No active polls. Create one above!</p>';
     } else {
         pollsList.innerHTML = "";
         Array.from(polls.values())
@@ -372,7 +372,7 @@ function renderPolls() {
     if (!inactivePollsList) return; 
     
     if (inactivePolls.size === 0) {
-        inactivePollsList.innerHTML = '<p class="empty-state">Nenhuma enquete encerrada ainda.</p>';
+        inactivePollsList.innerHTML = '<p class="empty-state">No finished polls yet.</p>';
     } else {
         inactivePollsList.innerHTML = "";
         Array.from(inactivePolls.values())
@@ -409,11 +409,11 @@ function createPollElement(poll) {
     const pollStatusClass = isInactive ? "poll-expired" : "";
     pollEl.className = `poll-item ${pollStatusClass}`;
     
-    const endDateTime = poll.endDate ? new Date(poll.endDate).toLocaleString("pt-BR") : "Sem prazo";
-    const statusText = isInactive ? ' <span class="status-expired">(Encerrada)</span>' : "";
+    const endDateTime = poll.endDate ? new Date(poll.endDate).toLocaleString("en-US") : "No deadline";
+    const statusText = isInactive ? ' <span class="status-expired">(Closed)</span>' : "";
     
     const winnersHtml = (isInactive && poll.winnersCount !== undefined) ? 
-        `<span class="winners-count">🏆 ${poll.winnersCount} ganhadores</span>` : "";
+        `<span class="winners-count">🏆 ${poll.winnersCount} winners</span>` : "";
 
     // Decorative icon based on title or random
     const icons = ["📊", "🗳️", "📈", "🔥", "✨"];
@@ -428,8 +428,8 @@ function createPollElement(poll) {
             <div class="poll-options">${optionsHtml}</div>
             <div class="poll-meta">
                 <div class="poll-stats">
-                    <div style="margin-bottom: 4px;"><strong>Total:</strong> ${totalVotes} votos</div>
-                    <div style="font-size: 0.7rem; opacity: 0.7;"><strong>Fim:</strong> ${endDateTime}</div>
+                    <div style="margin-bottom: 4px;"><strong>Total:</strong> ${totalVotes} votes</div>
+                    <div style="font-size: 0.7rem; opacity: 0.7;"><strong>End:</strong> ${endDateTime}</div>
                 </div>
                 ${winnersHtml}
             </div>
@@ -440,7 +440,7 @@ function createPollElement(poll) {
 
 function renderRanking(users) {
     if (!users || users.length === 0) {
-        rankingList.innerHTML = '<p class="empty-state">Ninguém pontuou ainda.</p>';
+        rankingList.innerHTML = '<p class="empty-state">No one has scored yet.</p>';
         return;
     }
 

@@ -9,7 +9,7 @@ export interface WsData {
 
 export const wsHandler: WebSocketHandler<WsData> = {
   open(ws) {
-    console.log("Novo cliente conectado:", ws.data.userId);
+    console.log("New client connected:", ws.data.userId);
 
     ws.subscribe("general");
   },
@@ -26,7 +26,7 @@ export const wsHandler: WebSocketHandler<WsData> = {
           ws.send(JSON.stringify({ type: "POLL_CREATED", data: newPoll }));
           ws.publish("general", JSON.stringify({ type: "POLL_CREATED", data: newPoll }));
 
-          console.log("Enquete criada:", newPoll);
+          console.log("Poll created:", newPoll);
           break;
         case "VOTE":
           const validVoteData = validateVote(payload.data);
@@ -35,7 +35,7 @@ export const wsHandler: WebSocketHandler<WsData> = {
           ws.publish("general", JSON.stringify({ type: "POLL_UPDATED", data: updatedPoll }));
           ws.send(JSON.stringify({ type: "POLL_UPDATED", data: updatedPoll }));
 
-          console.log("Voto computado para a enquete: ", updatedPoll.title);
+          console.log("Vote computed for poll: ", updatedPoll.title);
           break;
         case "GET_POLLS":
           const pollsList = await pollService.getPolls();
@@ -43,17 +43,17 @@ export const wsHandler: WebSocketHandler<WsData> = {
 
           ws.send(JSON.stringify({ type: "POLLS_LIST", data: pollsList }));
 
-          console.log("Retornado list de polls ativas.");
+          console.log("Returned active polls list.");
           break;
         case "GET_INACTIVE_POLLS":
           const inactivePolls = await pollService.getInactivePolls();
 
           ws.send(JSON.stringify({ type: "INACTIVE_POLLS_LIST", data: inactivePolls }));
 
-          console.log("Retornado list de polls inativas.");
+          console.log("Returned inactive polls list.");
           break;          
         default:
-          console.log("Tipo de mensagem desconhecido:", payload.type);
+          console.log("Unknown message type:", payload.type);
           break;
         case "GET_RANKING":
           const ranking = await userStore.getRanking();
@@ -61,13 +61,13 @@ export const wsHandler: WebSocketHandler<WsData> = {
           break;
       }
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Erro desconhecido";
+      const msg = error instanceof Error ? error.message : "Unknown error";
       ws.send(JSON.stringify({ type: "ERROR", data: { message: msg} }));
     }
 
   },
   close(ws) {
-    console.log("Cliente desconectado.");
+    console.log("Client disconnected.");
 
     ws.unsubscribe("general");
   }

@@ -6,8 +6,10 @@ import path from "path";
 
 const PUBLIC_DIR = path.resolve(import.meta.dir, "../public");
 
+const PORT = Number(process.env.PORT) || 3000;
+
 const server = Bun.serve({
-    port: 3000,
+    port: PORT,
     async fetch(request, server) {
 
         const url = new URL(request.url);

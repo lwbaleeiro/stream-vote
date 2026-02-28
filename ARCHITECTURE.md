@@ -1,10 +1,10 @@
-# Arquitetura — Pool System
+# Architecture — Pool System
 
-## Visão Geral
+## Overview
 
 ```
 ┌─────────────┐     HTTP      ┌──────────────────┐
-│   Cliente    │──────────────▶│                  │
+│   Client     │──────────────▶│                  │
 │  (Browser)   │              │   Bun.serve()    │
 │              │◀─────────────│   server.ts      │
 │              │   WebSocket   │                  │
@@ -21,40 +21,41 @@
                   │  Validator │ │ Service  │ │   Store    │
                   │            │ │          │ │ (in-memory)│
                   └────────────┘ └──────────┘ └────────────┘
+
 ```
 
-## Camadas
+## Layers
 
 ### 1. Server (`server.ts`)
 
-Ponto de entrada. Usa `Bun.serve()` com suporte a HTTP e WebSocket no mesmo servidor.
+The entry point. Uses `Bun.serve()` with integrated HTTP and WebSocket support on the same server instance.
 
-**Responsabilidades:**
+**Responsibilities:**
 
-- Subir o servidor HTTP na porta configurada
-- Configurar upgrade HTTP → WebSocket
-- Rotear requisições HTTP (futuro: REST endpoints)
+- Spin up the HTTP server on the configured port.
+- Handle the HTTP → WebSocket upgrade handshake.
+- Route HTTP requests (Future: REST endpoints).
 
 ### 2. WebSocket Handler (`ws/handler.ts`)
 
-Gerencia o ciclo de vida das conexões WebSocket.
+Manages the lifecycle of WebSocket connections.
 
-**Responsabilidades:**
+**Responsibilities:**
 
-- `open` — registrar cliente conectado
-- `message` — parsear mensagem, validar, despachar ação
-- `close` — remover cliente da lista
+- `open` — Register a newly connected client.
+- `message` — Parse incoming messages, validate, and dispatch actions.
+- `close` — Remove the client from the active list.
 
-**Protocolo de mensagens (JSON):**
+**Message Protocol (JSON):**
 
 ```typescript
-// Cliente → Servidor
+// Client → Server
 type ClientMessage =
   | { type: "CREATE_POLL"; data: { title: string; options: string[] } }
   | { type: "VOTE"; data: { pollId: string; optionIndex: number } }
   | { type: "GET_POLLS" };
 
-// Servidor → Cliente
+// Server → Client
 type ServerMessage =
   | { type: "POLL_CREATED"; data: Poll }
   | { type: "VOTE_REGISTERED"; data: PollResults }
@@ -64,37 +65,37 @@ type ServerMessage =
 
 ### 3. Poll Service (`polls/poll.service.ts`)
 
-Regras de negócio puras, sem dependência de transporte (HTTP/WS).
+Pure business logic, decoupled from the transport layer (HTTP/WS).
 
-**Responsabilidades:**
+**Responsibilities:**
 
-- Criar enquete com ID único
-- Registrar voto (com validação de voto único)
-- Calcular resultados
+- Creating polls with unique IDs.
+- Registering votes (including single-vote validation).
+- Calculating real-time results.
 
 ### 4. Poll Store (`polls/poll.store.ts`)
 
-Estado compartilhado in-memory usando `Map`.
+Shared in-memory state using `Map`.
 
 ```typescript
-// Estrutura interna
+// Internal Structure
 const polls = new Map<string, Poll>();
 const votes = new Map<string, Set<string>>(); // pollId → Set<voterId>
 ```
 
-**Decisão de design:** Singleton exportado como módulo. Permite trocar para banco de dados no futuro sem alterar o service.
+**Design Decision:** Exported as a Singleton module. This allows for a future switch to a persistent database without modifying the service layer.
 
 ### 5. Validators (`validators/poll.validator.ts`)
 
-Validação de dados recebidos antes de chegar ao service.
+Data validation layer for incoming payloads before they reach the service.
 
-**Regras:**
+**Rules:**
 
-- Título: string não vazia, max 200 caracteres
-- Opções: array com 2–10 itens, cada um string não vazia
-- Vote: pollId válido, optionIndex dentro do range
+- **Title:** Non-empty string, max 200 characters.
+- **Options:** Array of 2–10 items, each being a non-empty string.
+- **Vote:** Valid `pollId`, `optionIndex` within range.
 
-## Modelo de Dados
+## Data Model
 
 ```typescript
 interface Poll {
@@ -112,29 +113,27 @@ interface PollOption {
 }
 ```
 
-## Fluxo: Votação em Tempo Real
+## Flow: Real-Time Voting
 
-```
-1. Cliente A cria enquete        →  CREATE_POLL
-2. Servidor cria, salva no Store →  POLL_CREATED (broadcast)
-3. Cliente B vota                →  VOTE
-4. Servidor valida, incrementa   →  VOTE_REGISTERED (broadcast)
-5. Todos os clientes atualizam a UI com novos resultados
-```
+1. **Client A** creates a poll → `CREATE_POLL`
+2. **Server** creates poll, saves to Store → `POLL_CREATED` (broadcast)
+3. **Client B** casts a vote → `VOTE`
+4. **Server** validates and increments → `VOTE_REGISTERED` (broadcast)
+5. **All clients** update UI with the new results.
 
-## Pontos de Expansão
+## Roadmap & Expansion
 
-| Área      | Atual                        | Futuro              |
+| Area      | Current                      | Future              |
 | --------- | ---------------------------- | ------------------- |
 | Storage   | In-memory (Map)              | SQLite / PostgreSQL |
-| Auth      | Identificação por conexão WS | JWT / Sessions      |
+| Auth      | WS connection identification | JWT / Sessions      |
 | Transport | WebSocket only               | + REST API          |
-| Frontend  | Não incluso                  | HTML/JS ou React    |
+| Frontend  | Not included                 | HTML/JS or React    |
 | Deploy    | Local                        | Docker + Cloud      |
 
-## Decisões Técnicas
+## Technical Decisions
 
-1. **Sem framework HTTP** — usar `Bun.serve()` direto para entender o protocolo
-2. **Sem ORM** — começar com Map, migrar para SQL manual depois
-3. **Validação manual** — entender o conceito antes de usar libs (Zod, etc.)
-4. **Módulos ES** — usar `import/export` nativo do Bun
+1. **No HTTP Framework** — Using `Bun.serve()` directly to master the underlying protocol.
+2. **No ORM** — Starting with `Map` to prioritize speed, migrating to manual SQL later.
+3. **Manual Validation** — Learning core concepts before implementing libraries like Zod.
+4. **ES Modules** — Leveraging Bun's native `import/export` support.

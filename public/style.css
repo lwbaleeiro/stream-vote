@@ -40,6 +40,24 @@ body {
 }
 
 /* ===== Layout ===== */
+.auth-section {
+  max-width: 400px;
+  margin: 0 auto 2rem;
+}
+
+.disclaimer {
+  background: rgba(255, 193, 7, 0.1);
+  border-left: 4px solid #ffc107;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #ffc107;
+}
+
+.disclaimer p {
+  margin: 0;
+}
 .app {
   max-width: 1100px;
   margin: 0 auto;
@@ -59,8 +77,26 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 0;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.github-link {
+  color: var(--text-muted);
+  transition: color 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.github-link:hover {
+  color: var(--primary-color);
+  transform: scale(1.1);
 }
 
 .header h1 {

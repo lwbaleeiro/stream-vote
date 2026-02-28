@@ -9,27 +9,27 @@ class PollService {
   async createPoll(title: string, options: string[], endDate: Date, correctOptionIndex: number) {
 
     if (!title.trim()) {
-      throw new Error("O título da enquete é obrigatório.");
+      throw new Error("Poll title is required.");
     }
 
     if (isNaN(endDate.getTime())) {
-      throw new Error("Data de encerramento da enquente é invalida.");
+      throw new Error("Invalid poll end date.");
     }
 
     if (options.length < 2) {
-      throw new Error("Uma enquete deve ter pelo menos 2 opções.");
+      throw new Error("A poll must have at least 2 options.");
     }
 
     if (options.some(option => !option.trim())) {
-      throw new Error("Todas as opções devem ter um texto válido.");
+      throw new Error("All options must have valid text.");
     }
 
     if (correctOptionIndex === undefined || correctOptionIndex === null) {
-      throw new Error("O item correto da votação é obrigatório.");
+      throw new Error("The correct item for the vote is required.");
     }
 
     if (correctOptionIndex < 0 || correctOptionIndex >= options.length) {
-      throw new Error("Índice do item correto inválido.");
+      throw new Error("Invalid correct item index.");
     }
 
     const poll: Poll = {
@@ -51,19 +51,19 @@ class PollService {
   }
 
   async vote(pollId: string, userId: string, optionIndex: number) {
-    if (!pollId) throw new Error("Parametro pollId deve ser informado");
-    if (optionIndex === undefined || optionIndex === null) throw new Error("Parametro optionIndex deve ser informado");
+    if (!pollId) throw new Error("Parameter pollId must be provided");
+    if (optionIndex === undefined || optionIndex === null) throw new Error("Parameter optionIndex must be provided");
 
     const poll = await pollStore.getById(pollId);
-    if (!poll) throw new Error("Enquete não encontrada")
+    if (!poll) throw new Error("Poll not found")
 
     const isExpired = poll.endDate && new Date(poll.endDate) <= new Date();
     if (!poll.isActive || isExpired) {
-      throw new Error("Esta enquete já está encerrada.");
+      throw new Error("This poll is already closed.");
     }
 
-    if (!poll.options[optionIndex]) throw new Error("Opção de voto invalida.")
-    if (await pollStore.hasVoted(pollId, userId)) throw new Error("Usuário já votou para essa enquete.");
+    if (!poll.options[optionIndex]) throw new Error("Invalid vote option.")
+    if (await pollStore.hasVoted(pollId, userId)) throw new Error("User has already voted in this poll.");
 
     pollStore.registreVote(pollId, userId, optionIndex);
     poll.options[optionIndex].votes++;
@@ -79,12 +79,12 @@ class PollService {
 
   async closePolls(pollId: string, correctAwnser: number) {
 
-    if (!pollId) throw new Error("Parametro pollId deve ser informado");
+    if (!pollId) throw new Error("Parameter pollId must be provided");
 
     const poll = await pollStore.getById(pollId);
 
-    if (!poll) throw new Error("Enquete não encontrada")
-    if (!poll.options[correctAwnser]) throw new Error("Opção de voto invalida.")
+    if (!poll) throw new Error("Poll not found")
+    if (!poll.options[correctAwnser]) throw new Error("Invalid vote option.")
     
     poll.isActive = false;
     poll.options[correctAwnser].isCorrect = true;
@@ -107,7 +107,7 @@ class PollService {
 
     for (const poll of polls) {
       if (poll.isActive && poll.endDate && poll.endDate <= now) {
-        console.log(`Encerrando enquete expirada automaticamente: ${poll.title}`);
+        console.log(`Automatically closing expired poll: ${poll.title}`);
         
         // Encontrar a opção correta (marcada na criação)
         const correctIndex = poll.options.findIndex(opt => opt.isCorrect);

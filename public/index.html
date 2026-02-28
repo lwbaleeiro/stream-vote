@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stream Vote — Enquetes em Tempo Real</title>
+    <title>Stream Vote — Real-Time Polls</title>
     <link rel="stylesheet" href="/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,18 +15,23 @@
   <body>
     <div class="app">
       <header class="header">
-        <h1>Stream Vote</h1>
+        <div class="logo-container">
+          <h1>Stream Vote</h1>
+          <a href="https://github.com/lwbaleeiro/stream-vote" target="_blank" class="github-link" title="View on GitHub">
+            <svg height="24" width="24" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+          </a>
+        </div>
         <div class="header-actions">
           <div id="userProfile" class="user-profile hidden">
             <span id="usernameDisplay"></span>
-            <button class="btn btn-ghost btn-sm" id="logoutBtn">Sair</button>
+            <button class="btn btn-ghost btn-sm" id="logoutBtn">Logout</button>
           </div>
           <div id="guestProfile" class="user-profile">
-            <button class="btn btn-primary btn-sm" id="showAuthBtn">Entrar / Cadastrar</button>
+            <button class="btn btn-primary btn-sm" id="showAuthBtn">Login / Register</button>
           </div>
           <div class="connection-status" id="connectionStatus">
             <span class="status-dot"></span>
-            <span class="status-text">Desconectado</span>
+            <span class="status-text">Disconnected</span>
           </div>
         </div>
       </header>
@@ -34,34 +39,37 @@
       <!-- Seção de Autenticação (Agora Oculta por padrão) -->
       <section id="authSection" class="card auth-section hidden-toggle">
         <div class="section-header-compact">
-          <h2 id="authTitle">Acesso</h2>
+          <h2 id="authTitle">Access</h2>
           <button class="btn-close" id="closeAuthBtn">✕</button>
+        </div>
+        <div class="disclaimer">
+          <p>⚠️ <strong>Important:</strong> This is a study project. Please <strong>do not use</strong> real-world passwords or sensitive data.</p>
         </div>
         <form id="authForm">
           <div class="form-group">
-            <label for="username">Usuário</label>
+            <label for="username">Username</label>
             <input
               type="text"
               id="username"
-              placeholder="Seu apelido"
+              placeholder="Your nickname"
               required
             />
           </div>
           <div class="form-group">
-            <label for="password">Senha</label>
+            <label for="password">Password</label>
             <input
               type="password"
               id="password"
-              placeholder="Sua senha"
+              placeholder="Your password"
               required
             />
           </div>
           <div class="auth-buttons">
             <button type="submit" class="btn btn-primary" id="loginBtn">
-              Entrar
+              Login
             </button>
             <button type="button" class="btn btn-ghost" id="registerBtn">
-              Criar Conta
+              Create Account
             </button>
           </div>
         </form>
@@ -73,7 +81,7 @@
           <div class="card ranking-card">
             <h2>🏆 Ranking</h2>
             <div id="rankingList" class="ranking-list">
-              <p class="empty-state">Carregando...</p>
+              <p class="empty-state">Loading...</p>
             </div>
           </div>
         </aside>
@@ -82,44 +90,44 @@
           <!-- Criar Enquete (Agora Oculto por padrão) -->
           <section id="createPollSection" class="card create-section hidden-toggle">
             <div class="section-header-compact">
-              <h2>Criar Nova Enquete</h2>
+              <h2>Create New Poll</h2>
               <button class="btn-close" id="closeCreateBtn">✕</button>
             </div>
             <form id="createPollForm">
               <div class="form-group">
-                <label for="pollTitle">Título da Enquete</label>
+                <label for="pollTitle">Poll Title</label>
                 <input
                   type="text"
                   id="pollTitle"
-                  placeholder="Ex: Qual a melhor linguagem?"
+                  placeholder="Ex: What is the best language?"
                   required
                 />
               </div>
               <div class="form-group">
-                <label>Opções</label>
+                <label>Options</label>
                 <div id="optionsContainer">
                   <div class="option-row">
                     <input
                       type="text"
                       class="option-input"
-                      placeholder="Opção 1"
+                      placeholder="Option 1"
                       required
                     />
                     <label class="correct-option-label">
                       <input type="radio" name="correctOption" value="0" />
-                      <span>Correta</span>
+                      <span>Correct</span>
                     </label>
                   </div>
                   <div class="option-row">
                     <input
                       type="text"
                       class="option-input"
-                      placeholder="Opção 2"
+                      placeholder="Option 2"
                       required
                     />
                     <label class="correct-option-label">
                       <input type="radio" name="correctOption" value="1" />
-                      <span>Correta</span>
+                      <span>Correct</span>
                     </label>
                   </div>
                 </div>
@@ -128,33 +136,33 @@
                   class="btn btn-secondary"
                   id="addOptionBtn"
                 >
-                  + Adicionar Opção
+                  + Add Option
                 </button>
               </div>
               <div class="form-group">
-                <label for="pollEndDate">Data de Encerramento (Opcional)</label>
+                <label for="pollEndDate">End Date (Optional)</label>
                 <input type="datetime-local" id="pollEndDate" />
               </div>
               <button type="submit" class="btn btn-primary">
-                Criar Enquete
+                Create Poll
               </button>
             </form>
           </section>
 
-          <!-- Lista de Enquetes -->
+          <!-- Polls List -->
           <section class="card polls-section">
             <div class="polls-header">
               <div class="title-with-badge">
-                <h2>Enquetes Ativas</h2>
-                <button class="btn btn-accent btn-sm" id="showCreatePollBtn">+ Nova Enquete</button>
+                <h2>Active Polls</h2>
+                <button class="btn btn-accent btn-sm" id="showCreatePollBtn">+ New Poll</button>
               </div>
-              <button class="btn btn-ghost" id="refreshBtn">↻ Atualizar</button>
+              <button class="btn btn-ghost" id="refreshBtn">↻ Refresh</button>
             </div>
             <div class="carousel-wrapper">
               <button class="carousel-nav prev" id="prevActive">❮</button>
               <div id="pollsList" class="polls-list carousel-container">
                 <p class="empty-state">
-                  Nenhuma enquete ativa. Crie uma acima!
+                  No active polls. Create one above!
                 </p>
               </div>
               <button class="carousel-nav next" id="nextActive">❯</button>
@@ -162,15 +170,15 @@
             </div>
           </section>
 
-          <!-- Enquetes Encerradas -->
+          <!-- Inactive Polls -->
           <section class="card inactive-polls-section">
             <div class="polls-header">
-              <h2>Histórico de Enquetes</h2>
+              <h2>Poll History</h2>
             </div>
             <div class="carousel-wrapper">
               <button class="carousel-nav prev" id="prevInactive">❮</button>
               <div id="inactivePollsList" class="polls-list carousel-container">
-                <p class="empty-state">Nenhuma enquete encerrada ainda.</p>
+                <p class="empty-state">No finished polls yet.</p>
               </div>
               <button class="carousel-nav next" id="nextInactive">❯</button>
               <div class="carousel-dots" id="dotsInactive"></div>

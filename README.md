@@ -1,104 +1,107 @@
-# Pool System — Votação/Enquetes em Tempo Real
+# Pool System — Real-Time Voting/Polls
 
-Sistema de enquetes em tempo real construído com **TypeScript + Bun**, focado em aprender:
+A real-time polling system built with **TypeScript + Bun**, focused on learning:
 
-- **WebSockets** — comunicação bidirecional em tempo real
-- **Estado compartilhado** — gerenciar dados entre múltiplas conexões
-- **Validações** — garantir integridade de dados no backend
+- **WebSockets** — Bidirectional real-time communication
+- **Shared State** — Managing data across multiple connections
+- **Validations** — Ensuring data integrity on the backend
 
-## Funcionalidades
+## Features
 
-| Feature            | Descrição                                         |
-| ------------------ | ------------------------------------------------- |
-| Criar enquete      | Título + opções de voto                           |
-| Votar              | Selecionar uma opção (1 voto por usuário/enquete) |
-| Resultados ao vivo | Votos atualizam em tempo real via WebSocket       |
-| Listar enquetes    | Ver enquetes ativas e encerradas                  |
+| Feature      | Description                             |
+| ------------ | --------------------------------------- |
+| Create Poll  | Title + voting options                  |
+| Vote         | Select an option (1 vote per user/poll) |
+| Live Results | Votes update in real-time via WebSocket |
+| List Polls   | View active and closed polls            |
 
 ## Tech Stack
 
 - **Runtime:** [Bun](https://bun.sh)
-- **Linguagem:** TypeScript
-- **Comunicação:** WebSocket nativo do Bun
-- **HTTP:** Bun.serve (sem frameworks)
-- **Armazenamento:** In-memory (Map) — preparado para persistência futura
+- **Language:** TypeScript
+- **Communication:** Native Bun WebSockets
+- **HTTP:** Bun.serve (No frameworks)
+- **Storage:** In-memory (Map) — Prepared for future persistence
 
-## Como Rodar
+## Getting Started
 
 ```bash
-# Instalar dependências
+# Install dependencies
 bun install
 
-# Subir banco
+# Push database schema
 bunx drizzle-kit push
 
-# Executar servidor
+# Run server
 bun run dev
 
-# Executar testes
+# Run tests
 bun test
 
-# O servidor inicia em http://localhost:3000
+# The server starts at http://localhost:3000
+
 ```
 
-Você deverá ver o log tanto no terminal quanto no console do navegador!
+You should see logs in both the terminal and the browser console!
 
 ## Scripts
 
-| Comando         | Ação                                    |
-| --------------- | --------------------------------------- |
-| `bun run dev`   | Inicia servidor em modo desenvolvimento |
-| `bun run start` | Inicia servidor em modo produção        |
+| Command         | Action                                |
+| --------------- | ------------------------------------- |
+| `bun run dev`   | Starts the server in development mode |
+| `bun run start` | Starts the server in production mode  |
 
-## Estrutura do Projeto
+## Project Structure
 
 ```
 pool-system/
 ├── src/
 │   ├── server.ts          # Entry point — HTTP + WebSocket
 │   ├── ws/
-│   │   └── handler.ts     # Lógica WebSocket (conexão, mensagens)
+│   │   └── handler.ts     # WebSocket logic (connection, messages)
 │   ├── polls/
-│   │   ├── poll.model.ts   # Tipos e interfaces de enquete
-│   │   ├── poll.store.ts   # Estado compartilhado (in-memory)
-│   │   └── poll.service.ts # Regras de negócio
+│   │   ├── poll.model.ts   # Poll types and interfaces
+│   │   ├── poll.store.ts   # Shared state (in-memory)
+│   │   └── poll.service.ts # Business rules
 │   └── validators/
-│       └── poll.validator.ts # Validações de input
+│       └── poll.validator.ts # Input validations
 ├── package.json
 ├── tsconfig.json
 ├── README.md
 └── ARCHITECTURE.md
+
 ```
 
-## Conceitos Ensinados
+## Core Concepts
 
 ### WebSockets
 
-- Handshake HTTP → WebSocket
-- Eventos: `open`, `message`, `close`
-- Broadcast para todos os clientes conectados
+- HTTP → WebSocket Handshake
+- Events: `open`, `message`, `close`
+- Broadcasting to all connected clients
 
-### Estado Compartilhado
+### Shared State
 
-- Singleton store em memória
-- Concorrência: múltiplos clientes lendo/escrevendo
-- Padrão Observer para notificar mudanças
+- Singleton in-memory store
+- Concurrency: Multiple clients reading/writing
+- Observer pattern to notify changes
 
-### Validações
+### Validations
 
-- Validar payloads recebidos via WebSocket
-- Type guards do TypeScript
-- Retornar erros estruturados ao cliente
+- Validating payloads received via WebSocket
+- TypeScript Type Guards
+- Returning structured errors to the client
 
 ## Roadmap
 
-- [x] CRUD básico de enquetes (HTTP)
-- [x] WebSocket — votar e receber resultados ao vivo
-- [x] Validações de input
-- [x] Controle de voto único por usuário
-- [x] Testes básicos
-- [x] Persistência (SQLite/arquivo)
-- [x] Frontend simples (HTML + JS)
-- [x] Um item correto obrigatório
-- [ ] Lista de enquetes inativas e quantidade de ganhadores.
-- [ ] Criar enquete baseada em evento (api de esportes).
+- [x] Basic Poll CRUD (HTTP)
+- [x] WebSocket — Voting and receiving live results
+- [x] Input validations
+- [x] Single vote control per user
+- [x] Basic tests
+- [x] Persistence (SQLite/File)
+- [x] Simple Frontend (HTML + JS)
+- [x] At least one mandatory correct item
+- [x] List inactive polls and winner count
+- [ ] Save winner count to the database (TODO: DB PERSISTENCE)
+- [ ] Create poll based on events (e.g., Sports API)
