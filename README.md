@@ -144,3 +144,4 @@ pool-system/
 - [x] List inactive polls and winner count
 - [ ] Save winner count to the database (TODO: DB PERSISTENCE)
 - [ ] Create poll based on events (e.g., Sports API)
+- [ ] Live chat with users.
