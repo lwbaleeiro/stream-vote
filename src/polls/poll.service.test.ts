@@ -13,7 +13,8 @@ describe("Poll Service", () => {
     const poll = await pollService.createPoll(
       "Qual sua cor favorita?", 
       ["Azul", "Verde", "Paçoca"], 
-      new Date('2199-01-01')
+      new Date('2199-01-01'),
+      0
     );
 
     expect(poll).not.toBeNull();
@@ -24,29 +25,34 @@ describe("Poll Service", () => {
   })
 
   test("Deve lançar erro se não tiver opções", () => {
-    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca"], new Date('2199-01-01')))
+    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca"], new Date('2199-01-01'), 0))
       .rejects.toThrow("Uma enquete deve ter pelo menos 2 opções.");
   })
 
   test("Deve lançar erro se não tiver título", () => {
-    expect(pollService.createPoll("", ["Paçoca", "Doce de Leite"], new Date('2199-01-01')))
+    expect(pollService.createPoll("", ["Paçoca", "Doce de Leite"], new Date('2199-01-01'), 0))
       .rejects.toThrow("O título da enquete é obrigatório.");
   })
 
   test("Deve lançar erro se tiver opções inválidas", () => {
-    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""], new Date('2199-01-01')))
+    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""], new Date('2199-01-01'), 0))
       .rejects.toThrow("Todas as opções devem ter um texto válido.");
   })
 
   test("Deve lançar erro data invalida", () => {
-    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""], new Date('2199-13-45')))
+    expect(pollService.createPoll("Qual sua cor favorita?", ["Paçoca", ""], new Date('2199-13-45'), 0))
       .rejects.toThrow("Data de encerramento da enquente é invalida.");
+  })
+
+  test("Deve lançar erro se não tiver item correto", () => {
+    expect(pollService.createPoll("Qual sua cor favorita?", ["Azul", "Verde"], new Date('2199-01-01'), undefined as any))
+      .rejects.toThrow("O item correto da votação é obrigatório.");
   })
 
 
   test("Deve votar com sucesso", async () => {
 
-    const poll = await pollService.createPoll("Better programming languages?", ["Rust", "Java", "Go", "TypeScript"], new Date('2126-03-01'))
+    const poll = await pollService.createPoll("Better programming languages?", ["Rust", "Java", "Go", "TypeScript"], new Date('2126-03-01'), 0)
 
     await pollService.vote(poll.id, "1", 0,);
     const updatedPoll = await pollService.vote(poll.id, "2", 1);
@@ -57,7 +63,7 @@ describe("Poll Service", () => {
   })
 
   test("Deve barrar mesmo usuário votar duas vezes", async () => {
-    const poll = await pollService.createPoll("Better programming languages?", ["Rust", "Java", "Go", "TypeScript"], new Date('2126-03-01'))
+    const poll = await pollService.createPoll("Better programming languages?", ["Rust", "Java", "Go", "TypeScript"], new Date('2126-03-01'), 0)
     const userId = "abc1";
 
     await pollService.vote(poll.id, userId, 1);

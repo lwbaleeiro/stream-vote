@@ -184,6 +184,8 @@ form.addEventListener("submit", (e) => {
 
     if (options.length < 2) return showToast("Pelo menos 2 opções.", "error");
 
+    if (correctOptionIndex === null) return showToast("Selecione o item correto da votação.", "error");
+
     if (endDateInput) {
         const endDate = new Date(endDateInput);
         if (endDate <= new Date()) {

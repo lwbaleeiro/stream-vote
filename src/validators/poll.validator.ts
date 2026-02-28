@@ -1,4 +1,4 @@
-export function validateCreatePoll(data: any): { title: string; options: string[]; endDate: Date; correctOptionIndex?: number } {
+export function validateCreatePoll(data: any): { title: string; options: string[]; endDate: Date; correctOptionIndex: number } {
     
     if (!data) throw new Error("Dados não fornecidos.");
 
@@ -8,6 +8,14 @@ export function validateCreatePoll(data: any): { title: string; options: string[
     if (data.endDate && new Date(data.endDate) <= new Date()) throw new Error("A data de encerramento deve ser maior que a data atual.");
 
     if (typeof data.title !== "string" || data.title.trim() == "") throw new Error("title é obrigatório e deve ser do tipo 'string'");
+
+    if (data.correctOptionIndex === undefined || data.correctOptionIndex === null) {
+        throw new Error("O item correto da votação é obrigatório.");
+    }
+
+    if (typeof data.correctOptionIndex !== "number") {
+        throw new Error("correctOptionIndex deve ser do tipo 'number'.");
+    }
 
     return { 
         title: data.title, 

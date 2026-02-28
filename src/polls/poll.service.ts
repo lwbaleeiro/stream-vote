@@ -6,7 +6,7 @@ import type { User } from "../users/user.model";
 
 class PollService {
 
-  async createPoll(title: string, options: string[], endDate: Date, correctOptionIndex?: number) {
+  async createPoll(title: string, options: string[], endDate: Date, correctOptionIndex: number) {
 
     if (!title.trim()) {
       throw new Error("O título da enquete é obrigatório.");
@@ -22,6 +22,14 @@ class PollService {
 
     if (options.some(option => !option.trim())) {
       throw new Error("Todas as opções devem ter um texto válido.");
+    }
+
+    if (correctOptionIndex === undefined || correctOptionIndex === null) {
+      throw new Error("O item correto da votação é obrigatório.");
+    }
+
+    if (correctOptionIndex < 0 || correctOptionIndex >= options.length) {
+      throw new Error("Índice do item correto inválido.");
     }
 
     const poll: Poll = {
