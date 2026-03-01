@@ -34,9 +34,9 @@ const closeCreateBtn    = document.getElementById("closeCreateBtn");
 
 // ===== Init =====
 function init() {
+    connectWebSocket();
     if (user.id) {
         showMainContent();
-        connectWebSocket();
     } else {
         showGuestContent();
     }
@@ -63,7 +63,11 @@ function showGuestContent() {
 function connectWebSocket() {
     if (ws) ws.close();
     const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-    ws = new WebSocket(`${protocol}//${location.host}?userId=${user.id}`);
+    const url = new URL(`${protocol}//${location.host}`);
+    if (user.id) {
+        url.searchParams.set("userId", user.id);
+    }
+    ws = new WebSocket(url.toString());
 
     ws.addEventListener("open", () => {
         statusEl.classList.add("connected");
@@ -243,6 +247,11 @@ addOptionBtn.addEventListener("click", () => {
 refreshBtn.addEventListener("click", () => ws.send(JSON.stringify({ type: "GET_POLLS" })));
 
 function vote(pollId, optionIndex) {
+    if (!user.id) {
+        showToast("Please login to vote.", "info");
+        authSection.classList.add("active");
+        return;
+    }
     const poll = polls.get(pollId);
     if (!poll) return;
     if (!poll.isActive || (poll.endDate && new Date(poll.endDate) <= new Date())) {

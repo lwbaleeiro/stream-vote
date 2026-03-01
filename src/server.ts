@@ -13,9 +13,14 @@ const server = Bun.serve({
     async fetch(request, server) {
 
         const url = new URL(request.url);
-        const userIdFromUrl = url.searchParams.get("userId");
+        let userIdFromUrl = url.searchParams.get("userId");
 
-        if (server.upgrade(request, { data: { userId: userIdFromUrl || crypto.randomUUID() } })) {
+        // Handle string "null" or empty string from URL
+        if (userIdFromUrl === "null" || !userIdFromUrl) {
+            userIdFromUrl = crypto.randomUUID();
+        }
+
+        if (server.upgrade(request, { data: { userId: userIdFromUrl } })) {
             return;
         }
 
