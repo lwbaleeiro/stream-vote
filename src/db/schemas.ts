@@ -5,6 +5,7 @@ export const polls = sqliteTable("polls", {
     title: text("title").notNull(),
     createdAt: text("createdAt").notNull(),
     isActive: integer("isActive", { mode: "boolean" }).default(true).notNull(),
+    winnersCount: integer("winnersCount"),
     endDate: text("endDate").notNull()
 });
 

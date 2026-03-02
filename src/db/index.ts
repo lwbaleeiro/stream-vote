@@ -28,6 +28,7 @@ await client.execute(`
         title TEXT NOT NULL,
         createdAt TEXT NOT NULL,
         isActive INTEGER DEFAULT 1 NOT NULL,
+        winnersCount INTEGER,
         endDate TEXT NOT NULL
     );
 `);

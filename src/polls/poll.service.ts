@@ -134,8 +134,8 @@ class PollService {
       const correctIndex = poll.options.findIndex(opt => opt.isCorrect);
       const winningUsers = await pollStore.winningUsers(poll.id, correctIndex);
         
-        poll.winnersCount = winningUsers.length;
-        //await pollStore.save(poll); TODO: SALVAR NO BANCO DEPOIS
+      poll.winnersCount = winningUsers.length;
+      await pollStore.save(poll);
     }
     
     return inactivePolls;
