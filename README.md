@@ -142,6 +142,6 @@ pool-system/
 - [x] Simple Frontend (HTML + JS)
 - [x] At least one mandatory correct item
 - [x] List inactive polls and winner count
-- [ ] Save winner count to the database (TODO: DB PERSISTENCE)
+- [x] Save winner count to the database
 - [ ] Create poll based on events (e.g., Sports API)
 - [ ] Live chat with users.
