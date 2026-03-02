@@ -28,15 +28,31 @@ const server = Bun.serve({
             if (url.pathname === "/api/register") {
 
                 const body = await request.json() as any;
-                const user = await userService.register(body.username, body.password);
-                return Response.json(user);
+                try {
+                    const user = await userService.register(body.username, body.password);
+                    return Response.json(user);                    
+                } catch (error) {
+                    if (error instanceof Error) { 
+                        return Response.json({ message: error.message }, { status: 400 }) 
+                    }
+
+                    return Response.json({ message: "An unexpected error occured"}, { status: 500 });
+                }
             }
 
             if (url.pathname === "/api/login") {
 
                 const body = await request.json() as any;
-                const userId = await userService.login(body.username, body.password);
-                return Response.json({ userId });
+                try {
+                    const userId = await userService.login(body.username, body.password);
+                    return Response.json({ userId });                    
+                } catch (error) {
+                    if (error instanceof Error) { 
+                        return Response.json({ message: error.message }, { status: 400 }) 
+                    }
+
+                    return Response.json({ message: "An unexpected error occured"}, { status: 500 });                    
+                }
             }
         }
 

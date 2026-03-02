@@ -2,9 +2,12 @@ import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import * as schema from "./schemas";
 
+const isTest = process.env.NODE_ENV === "test";
+const databaseUrl = process.env.DATABASE_URL || (isTest ? "file:test.sqlite" : "file:stream-vote.sqlite");
+
 const client = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN!,
+    url: databaseUrl,
+    authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
 // Create tables if they don't exist (LibSQL style)

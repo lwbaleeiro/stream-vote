@@ -125,16 +125,17 @@ class PollService {
   }
 
   async getInactivePolls() {
-    const inactivePolls = (await pollStore.getAll()).filter(poll => poll.isActive === false);
+    const inactivePolls = (await pollStore.getAll()).filter(
+      poll => poll.isActive === false && poll.winnersCount === undefined
+    );
 
     for (const poll of inactivePolls) {
-      //if (poll.winnersCount === undefined) {
+
       const correctIndex = poll.options.findIndex(opt => opt.isCorrect);
       const winningUsers = await pollStore.winningUsers(poll.id, correctIndex);
         
         poll.winnersCount = winningUsers.length;
         //await pollStore.save(poll); TODO: SALVAR NO BANCO DEPOIS
-      //}
     }
     
     return inactivePolls;
