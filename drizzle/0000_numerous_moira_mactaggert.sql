@@ -1,4 +1,4 @@
-CREATE TABLE `options` (
+CREATE TABLE IF NOT EXISTS `options` (
 	`pollId` text NOT NULL,
 	`idx` integer NOT NULL,
 	`text` text NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE `options` (
 	PRIMARY KEY(`pollId`, `idx`)
 );
 --> statement-breakpoint
-CREATE TABLE `polls` (
+CREATE TABLE IF NOT EXISTS `polls` (
 	`id` text PRIMARY KEY NOT NULL,
 	`title` text NOT NULL,
 	`createdAt` text NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE `polls` (
 	`endDate` text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
 	`id` text PRIMARY KEY NOT NULL,
 	`username` text NOT NULL,
 	`passwordHash` text NOT NULL,
@@ -25,8 +25,8 @@ CREATE TABLE `users` (
 	`score` integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `users_username_unique` ON `users` (`username`);--> statement-breakpoint
-CREATE TABLE `votes` (
+CREATE UNIQUE INDEX IF NOT EXISTS `users_username_unique` ON `users` (`username`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `votes` (
 	`pollId` text NOT NULL,
 	`userId` text NOT NULL,
 	`optionIndex` integer NOT NULL,
