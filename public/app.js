@@ -61,31 +61,41 @@ function showGuestContent() {
 
 // ===== WebSocket =====
 function connectWebSocket() {
-    if (ws) ws.close();
+    if (ws) {
+        ws.intentionalClose = true;
+        ws.close();
+    }
+
     const protocol = location.protocol === "https:" ? "wss:" : "ws:";
     const url = new URL(`${protocol}//${location.host}`);
     if (user.id) {
         url.searchParams.set("userId", user.id);
     }
-    ws = new WebSocket(url.toString());
+    
+    const socket = new WebSocket(url.toString());
+    ws = socket;
 
-    ws.addEventListener("open", () => {
+    socket.addEventListener("open", () => {
         statusEl.classList.add("connected");
         statusEl.querySelector(".status-text").textContent = "Connected";
         showToast("Connected to server!", "success");
-        ws.send(JSON.stringify({ type: "GET_POLLS" }));
-        ws.send(JSON.stringify({ type: "GET_INACTIVE_POLLS" }));
-        ws.send(JSON.stringify({ type: "GET_RANKING" }));
+        socket.send(JSON.stringify({ type: "GET_POLLS" }));
+        socket.send(JSON.stringify({ type: "GET_INACTIVE_POLLS" }));
+        socket.send(JSON.stringify({ type: "GET_RANKING" }));
     });
 
-    ws.addEventListener("close", () => {
+    socket.addEventListener("close", () => {
         statusEl.classList.remove("connected");
         statusEl.querySelector(".status-text").textContent = "Disconnected";
-        showToast("Connection lost. Reconnecting...", "info");
-        setTimeout(init, 3000);
+        
+        // Only reconnect if it wasn't us closing it!
+        if (!socket.intentionalClose) {
+            showToast("Connection lost. Reconnecting...", "info");
+            setTimeout(connectWebSocket, 3000);
+        }
     });
 
-    ws.addEventListener("message", (e) => handleWsMessage(JSON.parse(e.data)));
+    socket.addEventListener("message", (e) => handleWsMessage(JSON.parse(e.data)));
 }
 
 function handleWsMessage(payload) {
