@@ -71,6 +71,8 @@ class PollStore {
             .from(schema.polls)
             .all();
 
+        console.log(`[DB] Fetched ${pollRows.length} poll rows from database`);
+
         const pollsWithOpts = await Promise.all(pollRows.map(async row => {
             const optionsRows = await db.select()
                 .from(schema.options)

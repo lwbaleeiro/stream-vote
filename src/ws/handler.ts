@@ -62,6 +62,7 @@ export const wsHandler: WebSocketHandler<WsData> = {
       }
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Unknown error";
+      console.error(`[WS ERROR] ${msg}`, error);
       ws.send(JSON.stringify({ type: "ERROR", data: { message: msg} }));
     }
 
