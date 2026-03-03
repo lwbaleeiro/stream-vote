@@ -3,7 +3,7 @@ import { createClient } from "@libsql/client";
 import * as schema from "./schemas";
 
 const isTest = process.env.NODE_ENV === "test";
-const databaseUrl = process.env.DATABASE_URL || (isTest ? "file:test.sqlite" : "file:stream-vote.sqlite");
+const databaseUrl = isTest ? "file:test.sqlite" : (process.env.TURSO_DATABASE_URL || process.env.DATABASE_URL || "file:stream-vote.sqlite");
 
 const client = createClient({
     url: databaseUrl,
