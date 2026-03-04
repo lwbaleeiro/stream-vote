@@ -31,6 +31,22 @@ const rankingList       = document.getElementById("rankingList");
 const createPollSection = document.getElementById("createPollSection");
 const showCreatePollBtn = document.getElementById("showCreatePollBtn");
 const closeCreateBtn    = document.getElementById("closeCreateBtn");
+const pollTypeRadios    = document.getElementsByName("pollType");
+const customPollFields  = document.getElementById("customPollFields");
+const eventPollFields   = document.getElementById("eventPollFields");
+const sportSelect       = document.getElementById("sportSelect");
+const leagueSelect      = document.getElementById("leagueSelect");
+const gamesLoading      = document.getElementById("gamesLoading");
+const gamesContainer    = document.getElementById("gamesContainer");
+const gamesList         = document.getElementById("gamesList");
+const selectedGameId    = document.getElementById("selectedGameId");
+
+// Sports config (hardcoded for now to avoid extra request, but ideally fetched)
+const AVAILABLE_SPORTS = [
+    { key: "basketball", label: "Basquete", icon: "🏀", leagues: [{ id: "nba", name: "NBA" }] },
+    { key: "soccer", label: "Futebol", icon: "⚽", leagues: [{ id: "brasileirao", name: "Brasileirão" }] },
+    { key: "esports", label: "E-Sports", icon: "🎮", leagues: [{ id: "cs2-majors", name: "CS2 Majors" }, { id: "lol-worlds", name: "LoL Worlds" }] }
+];
 
 // ===== Init =====
 function init() {
@@ -88,7 +104,6 @@ function connectWebSocket() {
         statusEl.classList.remove("connected");
         statusEl.querySelector(".status-text").textContent = "Disconnected";
         
-        // Only reconnect if it wasn't us closing it!
         if (!socket.intentionalClose) {
             showToast("Connection lost. Reconnecting...", "info");
             setTimeout(connectWebSocket, 3000);
@@ -131,6 +146,9 @@ function handleWsMessage(payload) {
             break;
         case "ERROR":
             showToast(payload.data.message, "error");
+            break;
+        case "UPCOMING_GAMES_LIST":
+            renderUpcomingGames(payload.data);
             break;
     }
 }
@@ -193,36 +211,148 @@ registerBtn.addEventListener("click", async () => {
 
 logoutBtn.addEventListener("click", () => { localStorage.clear(); location.reload(); });
 
+// ===== Poll Type Toggle =====
+pollTypeRadios.forEach(radio => {
+    radio.addEventListener("change", (e) => {
+        if (e.target.value === "custom") {
+            customPollFields.classList.remove("hidden");
+            eventPollFields.classList.add("hidden");
+        } else {
+            customPollFields.classList.add("hidden");
+            eventPollFields.classList.remove("hidden");
+            populateSports();
+        }
+    });
+});
+
+function populateSports() {
+    if (sportSelect.options.length > 1) return;
+    AVAILABLE_SPORTS.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.key;
+        opt.textContent = `${s.icon} ${s.label}`;
+        sportSelect.appendChild(opt);
+    });
+}
+
+sportSelect.addEventListener("change", (e) => {
+    const sportKey = e.target.value;
+    leagueSelect.innerHTML = '<option value="">Select a league</option>';
+    leagueSelect.disabled = !sportKey;
+    gamesContainer.classList.add("hidden");
+    
+    if (sportKey) {
+        const sport = AVAILABLE_SPORTS.find(s => s.key === sportKey);
+        sport.leagues.forEach(l => {
+            const opt = document.createElement("option");
+            opt.value = l.id;
+            opt.textContent = l.name;
+            leagueSelect.appendChild(opt);
+        });
+    }
+});
+
+leagueSelect.addEventListener("change", (e) => {
+    const leagueId = e.target.value;
+    const sportKey = sportSelect.value;
+    if (leagueId && sportKey) {
+        gamesLoading.classList.remove("hidden");
+        gamesContainer.classList.add("hidden");
+        ws.send(JSON.stringify({ 
+            type: "GET_UPCOMING_GAMES", 
+            data: { sportKey, leagueId } 
+        }));
+    }
+});
+
+function renderUpcomingGames(games) {
+    gamesLoading.classList.add("hidden");
+    gamesList.innerHTML = "";
+    
+    if (!games || games.length === 0) {
+        gamesList.innerHTML = '<p class="empty-state">No upcoming games found for this league.</p>';
+        gamesContainer.classList.remove("hidden");
+        return;
+    }
+
+    games.forEach(game => {
+        const card = document.createElement("div");
+        card.className = "game-card";
+        const date = new Date(game.startAt).toLocaleString();
+        
+        const homeLogo = game.homeTeam.logo ? `<img src="${game.homeTeam.logo}" class="team-logo-sm" onerror="this.src='https://placehold.co/24x24?text=H'">` : "🏠";
+        const awayLogo = game.awayTeam.logo ? `<img src="${game.awayTeam.logo}" class="team-logo-sm" onerror="this.src='https://placehold.co/24x24?text=A'">` : "🚌";
+
+        card.innerHTML = `
+            <div class="game-card-header">
+                <span>${game.leagueName}</span>
+                <span>ID: ${game.id}</span>
+            </div>
+            <div class="game-teams">
+                <div class="game-team">${homeLogo} <span>${game.homeTeam.name}</span></div>
+                <div class="game-team">${awayLogo} <span>${game.awayTeam.name}</span></div>
+            </div>
+            <div class="game-time">${date}</div>
+        `;
+        
+        card.onclick = () => {
+            document.querySelectorAll(".game-card").forEach(c => c.classList.remove("selected"));
+            card.classList.add("selected");
+            selectedGameId.value = game.id;
+        };
+        gamesList.appendChild(card);
+    });
+    gamesContainer.classList.remove("hidden");
+}
+
 // ===== Poll form =====
 form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const title        = document.getElementById("pollTitle").value.trim();
-    const endDateInput = document.getElementById("pollEndDate").value;
-    const rows         = optionsContainer.querySelectorAll(".option-row");
-    const options      = [];
-    let correctOptionIndex = null;
+    const pollType = document.querySelector('input[name="pollType"]:checked').value;
 
-    rows.forEach(row => {
-        const text = row.querySelector(".option-input").value.trim();
-        if (text) {
-            options.push(text);
-            if (row.querySelector('input[name="correctOption"]').checked)
-                correctOptionIndex = options.length - 1;
-        }
-    });
+    if (pollType === "custom") {
+        const title        = document.getElementById("pollTitle").value.trim();
+        const endDateInput = document.getElementById("pollEndDate").value;
+        const rows         = optionsContainer.querySelectorAll(".option-row");
+        const options      = [];
+        let correctOptionIndex = null;
 
-    if (options.length < 2)          return showToast("At least 2 options.", "error");
-    if (correctOptionIndex === null)  return showToast("Select the correct option.", "error");
-    if (endDateInput && new Date(endDateInput) <= new Date())
-        return showToast("End date must be in the future.", "error");
+        rows.forEach(row => {
+            const text = row.querySelector(".option-input").value.trim();
+            if (text) {
+                options.push(text);
+                if (row.querySelector('input[name="correctOption"]').checked)
+                    correctOptionIndex = options.length - 1;
+            }
+        });
 
-    ws.send(JSON.stringify({
-        type: "CREATE_POLL",
-        data: { title, options, correctOptionIndex,
-                endDate: endDateInput ? new Date(endDateInput).toISOString() : null }
-    }));
+        if (options.length < 2)          return showToast("At least 2 options.", "error");
+        if (correctOptionIndex === null)  return showToast("Select the correct option.", "error");
+        if (endDateInput && new Date(endDateInput) <= new Date())
+            return showToast("End date must be in the future.", "error");
+
+        ws.send(JSON.stringify({
+            type: "CREATE_POLL",
+            data: { title, options, correctOptionIndex,
+                    endDate: endDateInput ? new Date(endDateInput).toISOString() : null }
+        }));
+    } else {
+        const gameId = selectedGameId.value;
+        const sportKey = sportSelect.value;
+        
+        if (!gameId) return showToast("Please select a game.", "error");
+
+        ws.send(JSON.stringify({
+            type: "CREATE_EVENT_POLL",
+            data: { gameId, sportKey }
+        }));
+    }
+
     form.reset();
     resetOptions();
+    createPollSection.classList.remove("active");
+    eventPollFields.classList.add("hidden");
+    customPollFields.classList.remove("hidden");
 });
 
 function resetOptions() {
@@ -424,10 +554,13 @@ function createPollElement(poll) {
         const correctBadge = isInactive && opt.isCorrect ? '<span class="correct-badge">✓</span>' : "";
         const disabledClass = isInactive ? "disabled" : "";
         const clickAttr     = !isInactive ? `onclick="vote('${poll.id}', ${opt.index})"` : "";
+        
+        const logoHtml = opt.teamLogo ? `<img src="${opt.teamLogo}" class="team-logo-xs" onerror="this.style.display='none'">` : "";
+
         return `
             <div class="poll-option ${correctClass} ${disabledClass}" ${clickAttr}>
                 <div class="option-bar" style="width:${pct}%"></div>
-                <span class="option-text">${escapeHtml(opt.text)}${correctBadge}</span>
+                <span class="option-text">${logoHtml}${escapeHtml(opt.text)}${correctBadge}</span>
                 <span class="option-votes">${opt.votes} (${pct}%)</span>
             </div>`;
     }).join("");
@@ -442,9 +575,24 @@ function createPollElement(poll) {
     const icons      = ["📊","🗳️","📈","🔥","✨"];
     const icon       = icons[poll.id.charCodeAt(0) % icons.length];
 
+    let headerContent = `<span style="font-size:2.8rem;z-index:1;position:relative">${icon}</span>`;
+
+    if (poll.type === "event_related" && poll.options.length >= 2) {
+        const homeLogo = poll.options[0].teamLogo;
+        const awayLogo = poll.options[1].teamLogo;
+        if (homeLogo || awayLogo) {
+            headerContent = `
+                <div class="poll-header-versus">
+                    <img src="${homeLogo}" class="vs-logo" onerror="this.src='https://placehold.co/54x54?text=H'">
+                    <span class="vs-divider">VS</span>
+                    <img src="${awayLogo}" class="vs-logo" onerror="this.src='https://placehold.co/54x54?text=A'">
+                </div>`;
+        }
+    }
+
     el.innerHTML = `
         <div class="poll-card-header">
-            <span style="font-size:2.8rem;z-index:1;position:relative">${icon}</span>
+            ${headerContent}
         </div>
         <div class="poll-card-content">
             <h3>${escapeHtml(poll.title)} ${statusText}</h3>

@@ -18,6 +18,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@balldontlie/sdk": "^1.2.2",
     "@libsql/client": "^0.17.0",
     "drizzle-orm": "^0.45.1"
   }

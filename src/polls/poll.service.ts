@@ -43,8 +43,71 @@ class PollService {
       })),
       createdAt: new Date(),
       isActive: true,
-      endDate: endDate
+      endDate: endDate,
+      type: "custom",
+      resolved: false
     };
+
+    await pollStore.save(poll);
+    return poll;
+  }
+
+  async createEventPoll(sportKey: string, gameId: string) {
+    const { sportsService } = await import("../services/sports");
+    const apiKey = process.env.BALLDONTLIE_API_KEY;
+
+    if (!apiKey) throw new Error("API Key not configured");
+
+    // Fetch game details to create poll
+    // Since we don't have a direct 'getGameById' yet in the facade that returns UnifiedGame, 
+    // we might need to adjust. But let's assume we use getUpcomingGames and find the game, 
+    // or better, implement a getGameById in the service.
+    
+    // For now, let's use a simplified approach: fetch upcoming and find
+    const games = await sportsService.getUpcomingGames(sportKey as any, "", apiKey);
+    const game = games.find(g => g.id === gameId);
+
+    if (!game) throw new Error("Game not found or too far in the future.");
+
+    const poll: Poll = {
+        id: crypto.randomUUID(),
+        title: `${game.homeTeam.name} vs ${game.awayTeam.name}`,
+        type: "event_related",
+        sportKey,
+        sportEventId: gameId,
+        createdAt: new Date(),
+        isActive: true,
+        endDate: game.pollClosesAt,
+        resolved: false,
+        options: [
+            {
+                index: 0,
+                text: game.homeTeam.name,
+                votes: 0,
+                isCorrect: false,
+                teamId: game.homeTeam.id,
+                teamLogo: game.homeTeam.logo
+            },
+            {
+                index: 1,
+                text: game.awayTeam.name,
+                votes: 0,
+                isCorrect: false,
+                teamId: game.awayTeam.id,
+                teamLogo: game.awayTeam.logo
+            }
+        ]
+    };
+
+    // Add "Draw" option for sports that allow it (like Soccer)
+    if (sportKey === "soccer") {
+        poll.options.push({
+            index: 2,
+            text: "Draw",
+            votes: 0,
+            isCorrect: false
+        });
+    }
 
     await pollStore.save(poll);
     return poll;

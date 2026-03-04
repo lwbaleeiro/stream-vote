@@ -24,9 +24,6 @@ if (!isTest) {
         console.error("[DB] Migration failed:", error);
     }
 } else {
-    // Manually create tables for tests to avoid needing migration files in test environment
-    // or we can also run migrate(db, ...) here if we want consistency.
-    // Given the previous setup, let's stick to migrations for consistency.
     try {
         await migrate(db, { migrationsFolder: "./drizzle" });
     } catch (error) {

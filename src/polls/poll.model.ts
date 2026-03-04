@@ -3,6 +3,9 @@ export interface PollOption {
     text: string;
     votes: number;
     isCorrect: boolean;
+    // Event Related Fields
+    teamId?: string;
+    teamLogo?: string;
 }
 
 export interface Poll {
@@ -13,4 +16,9 @@ export interface Poll {
     isActive: boolean;
     endDate: Date;
     winnersCount?: number;
+    // Event Related Fields
+    type: "custom" | "event_related";
+    sportKey?: string;
+    sportEventId?: string;
+    resolved: boolean;
 }

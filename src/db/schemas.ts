@@ -6,7 +6,12 @@ export const polls = sqliteTable("polls", {
     createdAt: text("createdAt").notNull(),
     isActive: integer("isActive", { mode: "boolean" }).default(true).notNull(),
     winnersCount: integer("winnersCount"),
-    endDate: text("endDate").notNull()
+    endDate: text("endDate").notNull(),
+    // Event Related Fields
+    type: text("type").default("custom").notNull(),
+    sportKey: text("sportKey"),
+    sportEventId: text("sportEventId"),
+    resolved: integer("resolved", { mode: "boolean" }).default(false).notNull()
 });
 
 export const options = sqliteTable("options", {
@@ -14,7 +19,10 @@ export const options = sqliteTable("options", {
     idx: integer("idx").notNull(),
     text: text("text").notNull(),
     votes: integer("votes").default(0).notNull(),
-    isCorrect: integer("isCorrect", { mode: "boolean" }).default(false).notNull()
+    isCorrect: integer("isCorrect", { mode: "boolean" }).default(false).notNull(),
+    // Event Related Fields
+    teamId: text("teamId"),
+    teamLogo: text("teamLogo")
 }, (table) => [primaryKey( { columns: [table.pollId, table.idx] } )]);
 
 export const votes = sqliteTable("votes", {

@@ -2,6 +2,7 @@ import type { WebSocketHandler } from "bun";
 import { pollService } from "../polls/poll.service";
 import { userStore } from "../users/user.store";
 import { validateCreatePoll, validateVote } from "../validators/poll.validator";
+import { sportsService } from "../services/sports";
 
 export interface WsData {
   userId: string;
@@ -58,6 +59,17 @@ export const wsHandler: WebSocketHandler<WsData> = {
         case "GET_RANKING":
           const ranking = await userStore.getRanking();
           ws.send(JSON.stringify({ type: "RANKING_LIST", data: ranking }))
+          break;
+        case "GET_UPCOMING_GAMES":
+          const { sportKey, leagueId } = payload.data;
+          const apiKey = process.env.BALLDONTLIE_API_KEY || "";
+          const games = await sportsService.getUpcomingGames(sportKey, leagueId, apiKey);
+          ws.send(JSON.stringify({ type: "UPCOMING_GAMES_LIST", data: games }));
+          break;
+        case "CREATE_EVENT_POLL":
+          const eventPoll = await pollService.createEventPoll(payload.data.sportKey, payload.data.gameId);
+          ws.send(JSON.stringify({ type: "POLL_CREATED", data: eventPoll }));
+          ws.publish("general", JSON.stringify({ type: "POLL_CREATED", data: eventPoll }));
           break;
       }
     } catch (error) {

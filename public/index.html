@@ -7,7 +7,10 @@
     <link rel="stylesheet" href="/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="app">
@@ -17,8 +20,18 @@
             <h1>Stream Vote</h1>
             <div class="github-promo">
               <span>Check out my project on github</span>
-              <a href="https://github.com/lwbaleeiro/stream-vote" target="_blank" class="github-link" title="View on GitHub">
-                <svg height="20" width="20" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+              <a
+                href="https://github.com/lwbaleeiro/stream-vote"
+                target="_blank"
+                class="github-link"
+                title="View on GitHub"
+              >
+                <svg height="20" width="20" viewBox="0 0 16 16">
+                  <path
+                    fill="currentColor"
+                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+                  ></path>
+                </svg>
               </a>
             </div>
           </div>
@@ -29,7 +42,9 @@
             <button class="btn btn-ghost btn-sm" id="logoutBtn">Logout</button>
           </div>
           <div id="guestProfile" class="user-profile">
-            <button class="btn btn-accent btn-sm" id="showAuthBtn">Login / Register</button>
+            <button class="btn btn-accent btn-sm" id="showAuthBtn">
+              Login / Register
+            </button>
           </div>
           <div class="connection-status" id="connectionStatus">
             <span class="status-dot"></span>
@@ -44,20 +59,37 @@
           <button class="btn-close" id="closeAuthBtn">✕</button>
         </div>
         <div class="disclaimer">
-          <p>⚠️ <strong>Important:</strong> This is a study project. Do <strong>not</strong> use real passwords.</p>
+          <p>
+            ⚠️ <strong>Important:</strong> This is a study project. Do
+            <strong>not</strong> use real passwords.
+          </p>
         </div>
         <form id="authForm">
           <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Your nickname" required />
+            <input
+              type="text"
+              id="username"
+              placeholder="Your nickname"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Your password" required />
+            <input
+              type="password"
+              id="password"
+              placeholder="Your password"
+              required
+            />
           </div>
           <div class="auth-buttons">
-            <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
-            <button type="button" class="btn btn-ghost" id="registerBtn">Create Account</button>
+            <button type="submit" class="btn btn-primary" id="loginBtn">
+              Login
+            </button>
+            <button type="button" class="btn btn-ghost" id="registerBtn">
+              Create Account
+            </button>
           </div>
         </form>
       </section>
@@ -73,39 +105,127 @@
         </aside>
 
         <main class="main" id="mainContent">
-          <section id="createPollSection" class="card create-section hidden-toggle">
+          <section
+            id="createPollSection"
+            class="card create-section hidden-toggle"
+          >
             <div class="section-header-compact">
               <h2>Create New Poll</h2>
               <button class="btn-close" id="closeCreateBtn">✕</button>
             </div>
             <form id="createPollForm">
               <div class="form-group">
-                <label for="pollTitle">Poll Title</label>
-                <input type="text" id="pollTitle" placeholder="Ex: What is the best language?" required />
+                <label>Poll Type</label>
+                <div class="poll-type-selector">
+                  <label class="radio-label">
+                    <input
+                      type="radio"
+                      name="pollType"
+                      value="custom"
+                      checked
+                    />
+                    <span>Manual</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="pollType" value="event_related" />
+                    <span>Sports Event</span>
+                  </label>
+                </div>
               </div>
-              <div class="form-group">
-                <label>Options</label>
-                <div id="optionsContainer">
-                  <div class="option-row">
-                    <input type="text" class="option-input" placeholder="Option 1" required />
-                    <label class="correct-option-label">
-                      <input type="radio" name="correctOption" value="0" /><span>Correct</span>
-                    </label>
+
+              <!-- Custom Poll Fields -->
+              <div id="customPollFields">
+                <div class="form-group">
+                  <label for="pollTitle">Poll Title</label>
+                  <input
+                    type="text"
+                    id="pollTitle"
+                    placeholder="Ex: What is the best language?"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Options</label>
+                  <div id="optionsContainer">
+                    <div class="option-row">
+                      <input
+                        type="text"
+                        class="option-input"
+                        placeholder="Option 1"
+                      />
+                      <label class="correct-option-label">
+                        <input
+                          type="radio"
+                          name="correctOption"
+                          value="0"
+                        /><span>Correct</span>
+                      </label>
+                    </div>
+                    <div class="option-row">
+                      <input
+                        type="text"
+                        class="option-input"
+                        placeholder="Option 2"
+                      />
+                      <label class="correct-option-label">
+                        <input
+                          type="radio"
+                          name="correctOption"
+                          value="1"
+                        /><span>Correct</span>
+                      </label>
+                    </div>
                   </div>
-                  <div class="option-row">
-                    <input type="text" class="option-input" placeholder="Option 2" required />
-                    <label class="correct-option-label">
-                      <input type="radio" name="correctOption" value="1" /><span>Correct</span>
-                    </label>
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="addOptionBtn"
+                  >
+                    + Add Option
+                  </button>
+                </div>
+                <div class="form-group">
+                  <label for="pollEndDate">End Date (Optional)</label>
+                  <input type="datetime-local" id="pollEndDate" />
+                </div>
+              </div>
+
+              <!-- Event Related Fields -->
+              <div id="eventPollFields" class="hidden">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="sportSelect">Sport</label>
+                    <select id="sportSelect">
+                      <option value="">Select a sport</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="leagueSelect">League</label>
+                    <select id="leagueSelect" disabled>
+                      <option value="">Select a league</option>
+                    </select>
                   </div>
                 </div>
-                <button type="button" class="btn btn-secondary" id="addOptionBtn">+ Add Option</button>
+
+                <div id="gamesLoading" class="hidden">
+                  <p class="loading-text">Searching for upcoming games...</p>
+                </div>
+
+                <div
+                  id="gamesContainer"
+                  class="games-selection-container hidden"
+                >
+                  <label>Select a Game</label>
+                  <div id="gamesList" class="games-grid">
+                    <!-- Games will be injected here -->
+                  </div>
+                </div>
+
+                <input type="hidden" id="selectedGameId" />
               </div>
-              <div class="form-group">
-                <label for="pollEndDate">End Date (Optional)</label>
-                <input type="datetime-local" id="pollEndDate" />
-              </div>
-              <button type="submit" class="btn btn-primary">Create Poll</button>
+
+              <button type="submit" class="btn btn-primary" id="submitPollBtn">
+                Create Poll
+              </button>
             </form>
           </section>
 
@@ -113,9 +233,13 @@
             <div class="polls-header">
               <div class="title-with-badge">
                 <h2>Active Polls</h2>
-                <button class="btn btn-accent btn-sm" id="showCreatePollBtn">+ New Poll</button>
+                <button class="btn btn-accent btn-sm" id="showCreatePollBtn">
+                  + New Poll
+                </button>
               </div>
-              <button class="btn btn-ghost btn-sm" id="refreshBtn">↻ Refresh</button>
+              <button class="btn btn-ghost btn-sm" id="refreshBtn">
+                ↻ Refresh
+              </button>
             </div>
             <div class="carousel-wrapper">
               <button class="carousel-nav prev" id="prevActive">❮</button>

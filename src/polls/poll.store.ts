@@ -15,9 +15,17 @@ class PollStore {
             isActive: poll.isActive,
             endDate: poll.endDate.toISOString(),
             winnersCount: poll.winnersCount,
+            type: poll.type || "custom",
+            sportKey: poll.sportKey,
+            sportEventId: poll.sportEventId,
+            resolved: poll.resolved || false
         }).onConflictDoUpdate({ 
             target: schema.polls.id, 
-            set: { isActive: poll.isActive, title: poll.title } 
+            set: { 
+                isActive: poll.isActive, 
+                title: poll.title,
+                resolved: poll.resolved 
+            } 
         }).run();
 
         const optionPromises = poll.options.map(
@@ -26,7 +34,9 @@ class PollStore {
                 idx: opt.index, 
                 text: opt.text, 
                 votes: opt.votes,
-                isCorrect: opt.isCorrect
+                isCorrect: opt.isCorrect,
+                teamId: opt.teamId,
+                teamLogo: opt.teamLogo
             }).onConflictDoUpdate({
                 target: [schema.options.pollId, schema.options.idx],
                 set: { votes: opt.votes, isCorrect: opt.isCorrect }
@@ -56,11 +66,17 @@ class PollStore {
             winnersCount: result.winnersCount ?? undefined,
             createdAt: new Date(result.createdAt),
             endDate: new Date(result.endDate),
+            type: result.type as "custom" | "event_related",
+            sportKey: result.sportKey ?? undefined,
+            sportEventId: result.sportEventId ?? undefined,
+            resolved: result.resolved,
             options: optionsRows.map(opt => ({
                 index: opt.idx,
                 text: opt.text,
                 votes: opt.votes,
-                isCorrect: opt.isCorrect
+                isCorrect: opt.isCorrect,
+                teamId: opt.teamId ?? undefined,
+                teamLogo: opt.teamLogo ?? undefined
             }))
         };
     }
@@ -86,11 +102,17 @@ class PollStore {
                 isActive: row.isActive,
                 endDate: new Date(row.endDate),
                 winnersCount: row.winnersCount ?? undefined,
+                type: row.type as "custom" | "event_related",
+                sportKey: row.sportKey ?? undefined,
+                sportEventId: row.sportEventId ?? undefined,
+                resolved: row.resolved,
                 options: optionsRows.map(opt => ({
                     index: opt.idx,
                     text: opt.text,
                     votes: opt.votes,
-                    isCorrect: opt.isCorrect
+                    isCorrect: opt.isCorrect,
+                    teamId: opt.teamId ?? undefined,
+                    teamLogo: opt.teamLogo ?? undefined
                 }))
             };
         }));
