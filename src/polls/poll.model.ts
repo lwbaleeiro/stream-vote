@@ -21,4 +21,6 @@ export interface Poll {
     sportKey?: string;
     sportEventId?: string;
     resolved: boolean;
+    homeScore?: number;
+    awayScore?: number;
 }

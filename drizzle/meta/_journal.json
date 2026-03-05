@@ -15,6 +15,13 @@
       "when": 1772666939635,
       "tag": "0001_smiling_chronomancer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1772711777672,
+      "tag": "0002_normal_kang",
+      "breakpoints": true
     }
   ]
 }

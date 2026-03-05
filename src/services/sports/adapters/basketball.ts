@@ -89,27 +89,49 @@ export async function getGameResult(apiKey: string, gameId: string): Promise<Gam
         (sport) => sport.key === "basketball")?.apiBase;
 
     if (basketballApiBase != undefined) {
-        const response = await fetch(basketballApiBase + "/games/" + gameId, {
-            headers: { "Authorization": apiKey }
-        });
+        const url = `${basketballApiBase}/games/${gameId}`;
+        console.log(`[Basketball] Fetching game from: ${url}`);
         
-        const json = (await response.json()) as BallDontLieResponse;
-        const game = json.data[0];
+        try {
+            const response = await fetch(url, {
+                headers: { "Authorization": apiKey },
+                signal: (AbortSignal as any).timeout(10000) // 10s timeout
+            });
+            
+            if (!response.ok) {
+                console.error(`[Basketball] API Error: ${response.status} ${response.statusText}`);
+                return undefined;
+            }
 
-        if (!game) return undefined;
+            const json = await response.json() as any;
+            const game = json.data;
+            
+            if (!game || !game.id) {
+                console.warn(`[Basketball] Game ${gameId} not found or invalid response structure:`, json);
+                return undefined;
+            }
 
-        const winnerId = game.status === "final" ? (
-            game.home_team_score > game.visitor_team_score ? 
-            String(game.home_team.id) : String(game.visitor_team.id)
-        ) : null;
+            const status = String(game.status || "").toLowerCase();
+            const isFinished = status === "final";
 
-        return {
-            finished: game.status === "final",
-            homeScore: game.home_team_score,
-            awayScore: game.visitor_team_score,
-            winnerId: winnerId,
-            status: game.status === "final" ? "finished" : "scheduled"
-        };
+            console.log(`[Basketball] Success: ${gameId} status is ${game.status}`);
+
+            const winnerId = isFinished ? (
+                game.home_team_score > game.visitor_team_score ? 
+                String(game.home_team.id) : String(game.visitor_team.id)
+            ) : null;
+
+            return {
+                finished: isFinished,
+                homeScore: game.home_team_score,
+                awayScore: game.visitor_team_score,
+                winnerId: winnerId,
+                status: isFinished ? "finished" : "scheduled"
+            };
+        } catch (err) {
+            console.error(`[Basketball] Fetch failed for ${gameId}:`, err);
+            return undefined;
+        }
     }
     return;
 }

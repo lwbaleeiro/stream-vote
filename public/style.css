@@ -584,7 +584,8 @@ select:disabled { opacity: .4; cursor: not-allowed; }
 /* ===== Poll Header Logos ===== */
 .poll-header-versus {
   display: flex; align-items: center; justify-content: center;
-  gap: 1.5rem; position: relative; z-index: 1; padding: 0.5rem;
+  gap: 1rem; position: relative; z-index: 1; padding: 0.5rem;
+  width: 100%;
 }
 .vs-logo {
   width: 54px; height: 54px; object-fit: contain;
@@ -596,4 +597,22 @@ select:disabled { opacity: .4; cursor: not-allowed; }
   text-transform: uppercase; letter-spacing: 1px;
   background: var(--bg-1); padding: 4px 8px; border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* ===== Live Scores & Versus Enhancements ===== */
+.vs-team {
+  display: flex; align-items: center; gap: 0.75rem;
+  flex: 1;
+}
+.vs-team:first-child { justify-content: flex-end; }
+.vs-team:last-child { justify-content: flex-start; }
+.vs-score {
+  font-size: 1.5rem; font-weight: 800; color: var(--text);
+  font-family: 'JetBrains Mono', monospace; min-width: 1.5ch; text-align: center;
+  line-height: 1;
+}
+.live-disclaimer {
+  margin-top: 0.75rem; font-size: 0.65rem; color: var(--text-3);
+  text-align: center; font-style: italic; opacity: 0.8;
+  border-top: 1px solid var(--border); padding-top: 0.5rem;
 }

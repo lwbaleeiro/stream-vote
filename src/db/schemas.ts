@@ -11,7 +11,9 @@ export const polls = sqliteTable("polls", {
     type: text("type").default("custom").notNull(),
     sportKey: text("sportKey"),
     sportEventId: text("sportEventId"),
-    resolved: integer("resolved", { mode: "boolean" }).default(false).notNull()
+    resolved: integer("resolved", { mode: "boolean" }).default(false).notNull(),
+    homeScore: integer("homeScore"),
+    awayScore: integer("awayScore")
 });
 
 export const options = sqliteTable("options", {

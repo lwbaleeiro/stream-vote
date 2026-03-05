@@ -580,12 +580,21 @@ function createPollElement(poll) {
     if (poll.type === "event_related" && poll.options.length >= 2) {
         const homeLogo = poll.options[0].teamLogo;
         const awayLogo = poll.options[1].teamLogo;
+        const homeScore = poll.homeScore !== undefined ? poll.homeScore : 0;
+        const awayScore = poll.awayScore !== undefined ? poll.awayScore : 0;
+
         if (homeLogo || awayLogo) {
             headerContent = `
                 <div class="poll-header-versus">
-                    <img src="${homeLogo}" class="vs-logo" onerror="this.src='https://placehold.co/54x54?text=H'">
+                    <div class="vs-team">
+                        <img src="${homeLogo}" class="vs-logo" onerror="this.src='https://placehold.co/54x54?text=H'">
+                        <span class="vs-score">${homeScore}</span>
+                    </div>
                     <span class="vs-divider">VS</span>
-                    <img src="${awayLogo}" class="vs-logo" onerror="this.src='https://placehold.co/54x54?text=A'">
+                    <div class="vs-team">
+                        <span class="vs-score">${awayScore}</span>
+                        <img src="${awayLogo}" class="vs-logo" onerror="this.src='https://placehold.co/54x54?text=A'">
+                    </div>
                 </div>`;
         }
     }
@@ -604,6 +613,7 @@ function createPollElement(poll) {
                 </div>
                 ${winners}
             </div>
+            ${poll.type === 'event_related' ? '<div class="live-disclaimer">⚡ Live scores update every 5m</div>' : ''}
         </div>`;
     return el;
 }

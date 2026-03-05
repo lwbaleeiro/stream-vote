@@ -58,12 +58,6 @@ class PollService {
 
     if (!apiKey) throw new Error("API Key not configured");
 
-    // Fetch game details to create poll
-    // Since we don't have a direct 'getGameById' yet in the facade that returns UnifiedGame, 
-    // we might need to adjust. But let's assume we use getUpcomingGames and find the game, 
-    // or better, implement a getGameById in the service.
-    
-    // For now, let's use a simplified approach: fetch upcoming and find
     const games = await sportsService.getUpcomingGames(sportKey as any, "", apiKey);
     const game = games.find(g => g.id === gameId);
 
@@ -99,7 +93,6 @@ class PollService {
         ]
     };
 
-    // Add "Draw" option for sports that allow it (like Soccer)
     if (sportKey === "soccer") {
         poll.options.push({
             index: 2,
@@ -151,15 +144,19 @@ class PollService {
     
     poll.isActive = false;
     poll.options[correctAwnser].isCorrect = true;
-
-    await pollStore.save(poll);
+    
+    if (poll.type === "event_related") {
+        poll.resolved = true;
+    }
 
     const winningUsers = await pollStore.winningUsers(pollId, correctAwnser);
     await addScore(winningUsers);
-    const ranking = await userStore.getRanking();
-
+    
     poll.winnersCount = winningUsers.length;
 
+    await pollStore.save(poll);
+
+    const ranking = await userStore.getRanking();
     bus.emit("ranking_changed", ranking);
     bus.emit("poll_closed", poll);
   }
@@ -186,19 +183,54 @@ class PollService {
   }
 
   async getInactivePolls() {
-    const inactivePolls = (await pollStore.getAll()).filter(
-      poll => poll.isActive === false && poll.winnersCount === undefined
-    );
+    const allPolls = await pollStore.getAll();
+    const inactivePolls = allPolls.filter(poll => poll.isActive === false);
 
     for (const poll of inactivePolls) {
 
+      if (poll.type === "event_related" && !poll.resolved) continue;
+
+      if (poll.type === "event_related" && poll.resolved) {
+
+        const hasWinner = poll.options.some(opt => opt.isCorrect);
+        if (!hasWinner && poll.homeScore !== undefined 
+            && poll.awayScore !== undefined && poll.homeScore !== poll.awayScore) {
+
+          const winnerOptionIndex = poll.homeScore > poll.awayScore ? 0 : 1;
+          poll.options.forEach(opt => { opt.isCorrect = (opt.index === winnerOptionIndex); });
+          const winningUsers = await pollStore.winningUsers(poll.id, winnerOptionIndex);
+          poll.winnersCount = winningUsers.length;
+
+          console.log(`[History] Recovered winner for resolved poll "${poll.title}": option ${winnerOptionIndex}, ${poll.winnersCount} winners`);
+
+          await pollStore.save(poll);
+
+        } else if (poll.winnersCount === undefined) {
+          
+          poll.winnersCount = poll.options.some(opt => opt.isCorrect)
+            ? (await pollStore.winningUsers(poll.id, 
+              poll.options.findIndex(o => o.isCorrect))).length: 0; await pollStore.save(poll);
+        }
+        continue;
+      }
+
+      if (poll.winnersCount !== undefined) continue;
+
       const correctIndex = poll.options.findIndex(opt => opt.isCorrect);
-      const winningUsers = await pollStore.winningUsers(poll.id, correctIndex);
-        
-      poll.winnersCount = winningUsers.length;
-      await pollStore.save(poll);
+      if (correctIndex !== -1) {
+
+        const winningUsers = await pollStore.winningUsers(poll.id, correctIndex);
+        poll.winnersCount = winningUsers.length;
+        await pollStore.save(poll);
+
+      } else {
+
+        poll.winnersCount = 0;
+        await pollStore.save(poll);
+
+      }
     }
-    
+
     return inactivePolls;
   }
 
@@ -214,7 +246,7 @@ class PollService {
     const { sportsService } = await import("../services/sports");
 
     const pendingPolls = polls.filter(poll => 
-        poll.type === "event_related" && poll.isActive && !poll.resolved
+        poll.type === "event_related" && !poll.resolved
     );
 
     if (pendingPolls.length === 0) return;
@@ -222,40 +254,58 @@ class PollService {
     console.log(`[Cron] Checking ${pendingPolls.length} pending event polls...`);
 
     for (const poll of pendingPolls) {
+        console.log(`[Cron] Processing poll ${poll.id}: sportKey=${poll.sportKey}, eventId=${poll.sportEventId}`);
         try {
-            if (!poll.sportKey || !poll.sportEventId) continue;
+            if (!poll.sportKey || !poll.sportEventId) {
+                console.log(`[Cron] Skipping poll ${poll.id} - Missing key or eventId`);
+                continue;
+            }
 
+            console.log(`[Cron] Calling getGameResult for ${poll.sportEventId}...`);
             const result = await sportsService.getGameResult(
                 poll.sportKey as any, 
                 poll.sportEventId, 
                 apiKey
             );
+            console.log(`[Cron] getGameResult returned: ${result ? 'SUCCESS' : 'NULL'} for ${poll.sportEventId}`);
 
-            if (result && result.finished) {
-                console.log(`[Cron] Game ${poll.sportEventId} finished! Resolving poll: ${poll.title}`);
+            if (result) {
+                poll.homeScore = result.homeScore || 0;
+                poll.awayScore = result.awayScore || 0;
 
-                let correctIndex = -1;
-                if (result.winnerId) {
-                    correctIndex = poll.options.findIndex(opt => opt.teamId === result.winnerId);
-                } else if (poll.sportKey === "soccer") {
-                    correctIndex = poll.options.findIndex(opt => opt.text.toLowerCase() === "draw");
-                }
+                if (result.finished) {
+                    console.log(`[Cron] Game ${poll.sportEventId} finished! Resolving poll: ${poll.title}`);
 
-                if (correctIndex !== -1) {
-                    await this.closePolls(poll.id, correctIndex);
+                    let correctIndex = -1;
+                    if (result.winnerId) {
+                        correctIndex = poll.options.findIndex(opt => String(opt.teamId) === String(result.winnerId));
+                    }
                     
-                    poll.resolved = true;
-                    await pollStore.save(poll);
-                    
-                    console.log(`[Cron] Poll ${poll.id} resolved successfully.`);
+                    if (correctIndex === -1 && poll.sportKey === "soccer") {
+                        correctIndex = poll.options.findIndex(opt => opt.text.toLowerCase() === "draw");
+                    }
+
+                    if (correctIndex !== -1) {
+
+                        await pollStore.save(poll);
+                        await this.closePolls(poll.id, correctIndex);
+                        console.log(`[Cron] Poll ${poll.id} resolved successfully.`);
+
+                    } else {
+
+                        await pollStore.save(poll);
+                        console.error(`[Cron] Could not find winning option for poll ${poll.id} (WinnerID: ${result.winnerId})`);
+                    }
                 } else {
-                    console.error(`[Cron] Could not find winning option for poll ${poll.id} (WinnerID: ${result.winnerId})`);
+
+                    await pollStore.save(poll);
                 }
             }
         } catch (error) {
             console.error(`[Cron] Error resolving poll ${poll.id}:`, error);
         }
     }
+    console.log(`[Cron] Finished check for all pending polls.`);
   }
 }
 

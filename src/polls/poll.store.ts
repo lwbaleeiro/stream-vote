@@ -18,13 +18,18 @@ class PollStore {
             type: poll.type || "custom",
             sportKey: poll.sportKey,
             sportEventId: poll.sportEventId,
-            resolved: poll.resolved || false
+            resolved: poll.resolved || false,
+            homeScore: poll.homeScore,
+            awayScore: poll.awayScore
         }).onConflictDoUpdate({ 
             target: schema.polls.id, 
             set: { 
                 isActive: poll.isActive, 
                 title: poll.title,
-                resolved: poll.resolved 
+                resolved: poll.resolved,
+                homeScore: poll.homeScore,
+                awayScore: poll.awayScore,
+                winnersCount: poll.winnersCount
             } 
         }).run();
 
@@ -70,6 +75,8 @@ class PollStore {
             sportKey: result.sportKey ?? undefined,
             sportEventId: result.sportEventId ?? undefined,
             resolved: result.resolved,
+            homeScore: result.homeScore ?? undefined,
+            awayScore: result.awayScore ?? undefined,
             options: optionsRows.map(opt => ({
                 index: opt.idx,
                 text: opt.text,
@@ -106,6 +113,8 @@ class PollStore {
                 sportKey: row.sportKey ?? undefined,
                 sportEventId: row.sportEventId ?? undefined,
                 resolved: row.resolved,
+                homeScore: row.homeScore ?? undefined,
+                awayScore: row.awayScore ?? undefined,
                 options: optionsRows.map(opt => ({
                     index: opt.idx,
                     text: opt.text,
