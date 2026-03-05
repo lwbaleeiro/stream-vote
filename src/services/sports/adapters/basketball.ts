@@ -32,7 +32,8 @@ interface BallDontLieResponse {
 
 export async function getUpcomingGames(apiKey: string): Promise<UnifiedGame[] | undefined> {
 
-    const todayDate = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const todayDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const basketballApiBase = SPORTS.find(
         (sport) => sport.key === "basketball")?.apiBase;
 

@@ -2,6 +2,7 @@ import { wsHandler, type WsData } from "./ws/handler";
 import { userService } from "./users/user.service"
 import { pollService } from "./polls/poll.service";
 import { bus } from "./events";
+import { cronService } from "./services/cron.service";
 import path from "path";
 
 const PUBLIC_DIR = path.resolve(import.meta.dir, "../public");
@@ -76,9 +77,6 @@ bus.on("poll_closed", (poll) => {
     server.publish("general", JSON.stringify({ type: "POLL_UPDATED", data: poll }));
 });
 
-// Job de verificação de enquetes expiradas (a cada 30 segundos)
-setInterval(() => {
-    pollService.checkExpiredPolls();
-}, 30000);
+cronService.start();
 
 console.log(`Server running at http://${server.hostname}:${server.port}`);

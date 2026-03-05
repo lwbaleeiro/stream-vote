@@ -171,11 +171,9 @@ class PollService {
     for (const poll of polls) {
       if (poll.isActive && poll.endDate && poll.endDate <= now) {
         console.log(`Automatically closing expired poll: ${poll.title}`);
-        
-        // Encontrar a opção correta (marcada na criação)
+
         const correctIndex = poll.options.findIndex(opt => opt.isCorrect);
-        
-        // Se não houver opção correta marcada, simplesmente encerramos sem pontos
+
         if (correctIndex !== -1) {
           await this.closePolls(poll.id, correctIndex);
         } else {
@@ -202,6 +200,62 @@ class PollService {
     }
     
     return inactivePolls;
+  }
+
+  async resolveEventPolls() {
+    const polls = await pollStore.getAll();
+    const apiKey = process.env.BALLDONTLIE_API_KEY || "";
+    
+    if (!apiKey) {
+        console.warn("[Cron] API Key not configured, skipping event resolution");
+        return;
+    }
+
+    const { sportsService } = await import("../services/sports");
+
+    const pendingPolls = polls.filter(poll => 
+        poll.type === "event_related" && poll.isActive && !poll.resolved
+    );
+
+    if (pendingPolls.length === 0) return;
+
+    console.log(`[Cron] Checking ${pendingPolls.length} pending event polls...`);
+
+    for (const poll of pendingPolls) {
+        try {
+            if (!poll.sportKey || !poll.sportEventId) continue;
+
+            const result = await sportsService.getGameResult(
+                poll.sportKey as any, 
+                poll.sportEventId, 
+                apiKey
+            );
+
+            if (result && result.finished) {
+                console.log(`[Cron] Game ${poll.sportEventId} finished! Resolving poll: ${poll.title}`);
+
+                let correctIndex = -1;
+                if (result.winnerId) {
+                    correctIndex = poll.options.findIndex(opt => opt.teamId === result.winnerId);
+                } else if (poll.sportKey === "soccer") {
+                    correctIndex = poll.options.findIndex(opt => opt.text.toLowerCase() === "draw");
+                }
+
+                if (correctIndex !== -1) {
+                    await this.closePolls(poll.id, correctIndex);
+                    
+                    poll.resolved = true;
+                    await pollStore.save(poll);
+                    
+                    console.log(`[Cron] Poll ${poll.id} resolved successfully.`);
+                } else {
+                    console.error(`[Cron] Could not find winning option for poll ${poll.id} (WinnerID: ${result.winnerId})`);
+                }
+            }
+        } catch (error) {
+            console.error(`[Cron] Error resolving poll ${poll.id}:`, error);
+        }
+    }
   }
 }
 
