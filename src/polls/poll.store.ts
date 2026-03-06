@@ -145,6 +145,25 @@ class PollStore {
         }).run();
     }
 
+    async hasEventPoll(sportEventId: string): Promise<boolean> {
+        const pollRow = await db.select()
+            .from(schema.polls)
+            .where(eq(schema.polls.sportEventId, sportEventId))
+            .get();
+        return !!pollRow;
+    }
+
+    async getEventPollGameIds(sportKey: string): Promise<string[]> {
+        const pollRows = await db.select({ sportEventId: schema.polls.sportEventId })
+            .from(schema.polls)
+            .where(eq(schema.polls.sportKey, sportKey))
+            .all();
+        
+        return pollRows
+            .map(row => row.sportEventId)
+            .filter((id): id is string => id !== null);
+    }
+
     async hasVoted(pollId: string, userId: string): Promise<boolean> {
         
         const vote = await db.select()

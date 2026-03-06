@@ -58,6 +58,9 @@ class PollService {
 
     if (!apiKey) throw new Error("API Key not configured");
 
+    const hasPoll = await pollStore.hasEventPoll(gameId);
+    if (hasPoll) throw new Error("An event poll for this game already exists.");
+
     const games = await sportsService.getUpcomingGames(sportKey as any, "", apiKey);
     const game = games.find(g => g.id === gameId);
 

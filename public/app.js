@@ -166,9 +166,24 @@ showCreatePollBtn.addEventListener("click", () => {
         authSection.classList.add("active");
         return;
     }
+    if (!createPollSection.classList.contains("active")) {
+        resetCreatePollModal();
+    }
     createPollSection.classList.toggle("active");
 });
 closeCreateBtn.addEventListener("click", () => createPollSection.classList.remove("active"));
+
+function resetCreatePollModal() {
+    form.reset();
+    resetOptions();
+    eventPollFields.classList.add("hidden");
+    customPollFields.classList.remove("hidden");
+    leagueSelect.innerHTML = '<option value="">Select a league</option>';
+    leagueSelect.disabled = true;
+    gamesContainer.classList.add("hidden");
+    gamesList.innerHTML = "";
+    selectedGameId.value = "";
+}
 
 // ===== Auth =====
 authForm.addEventListener("submit", async (e) => {
@@ -331,6 +346,7 @@ form.addEventListener("submit", (e) => {
             }
         });
 
+        if (!title)                      return showToast("Poll title is required.", "error");
         if (options.length < 2)          return showToast("At least 2 options.", "error");
         if (correctOptionIndex === null)  return showToast("Select the correct option.", "error");
         if (endDateInput && new Date(endDateInput) <= new Date())
@@ -353,23 +369,20 @@ form.addEventListener("submit", (e) => {
         }));
     }
 
-    form.reset();
-    resetOptions();
+    resetCreatePollModal();
     createPollSection.classList.remove("active");
-    eventPollFields.classList.add("hidden");
-    customPollFields.classList.remove("hidden");
 });
 
 function resetOptions() {
     optionsContainer.innerHTML = `
         <div class="option-row">
-            <input type="text" class="option-input" placeholder="Option 1" required>
+            <input type="text" class="option-input" placeholder="Option 1">
             <label class="correct-option-label">
                 <input type="radio" name="correctOption" value="0"><span>Correct</span>
             </label>
         </div>
         <div class="option-row">
-            <input type="text" class="option-input" placeholder="Option 2" required>
+            <input type="text" class="option-input" placeholder="Option 2">
             <label class="correct-option-label">
                 <input type="radio" name="correctOption" value="1"><span>Correct</span>
             </label>
