@@ -43,8 +43,8 @@ const selectedGameId    = document.getElementById("selectedGameId");
 
 // Sports config (hardcoded for now to avoid extra request, but ideally fetched)
 const AVAILABLE_SPORTS = [
-    { key: "basketball", label: "Basquete", icon: "🏀", leagues: [{ id: "nba", name: "NBA" }] },
-    { key: "soccer", label: "Futebol", icon: "⚽", leagues: [{ id: "brasileirao", name: "Brasileirão" }] },
+    { key: "basketball", label: "Basketball", icon: "🏀", leagues: [{ id: "nba", name: "NBA" }] },
+    { key: "soccer", label: "Soccer", icon: "⚽", leagues: [{ id: "ucl", name: "Champions League" }] },
     { key: "esports", label: "E-Sports", icon: "🎮", leagues: [{ id: "cs2-majors", name: "CS2 Majors" }, { id: "lol-worlds", name: "LoL Worlds" }] }
 ];
 
@@ -230,7 +230,12 @@ function populateSports() {
     AVAILABLE_SPORTS.forEach(s => {
         const opt = document.createElement("option");
         opt.value = s.key;
-        opt.textContent = `${s.icon} ${s.label}`;
+        if (s.key !== "basketball") {
+            opt.textContent = `${s.icon} ${s.label} (Coming soon)`;
+            opt.disabled = true;
+        } else {
+            opt.textContent = `${s.icon} ${s.label}`;
+        }
         sportSelect.appendChild(opt);
     });
 }

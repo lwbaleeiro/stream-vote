@@ -1,4 +1,6 @@
 import { getUpcomingGames as getBasketballGames, getGameResult as getBasketballResult } from "./adapters/basketball";
+import { getUpcomingGames as getSoccerGames, getGameResult as getSoccerResult } from "./adapters/soccer";
+import { getUpcomingGames as getEsportsGames, getGameResult as getEsportsResult } from "./adapters/esports";
 import type { SportKey } from "./sports.config";
 import type { UnifiedGame, GameResult } from "./sports.types";
 
@@ -11,15 +13,14 @@ export const sportsService: SportsService = {
     async getUpcomingGames(sportKey, leagueId, apiKey) {
         switch (sportKey) {
             case "basketball":
-                const games = await getBasketballGames(apiKey);
-                // Filter by league if needed (currently the adapter only does NBA)
-                return games || [];
+                const bballGames = await getBasketballGames(apiKey);
+                return bballGames || [];
             case "soccer":
-                // TODO: Implement soccer adapter
-                return [];
+                const soccerGames = await getSoccerGames(apiKey);
+                return soccerGames || [];
             case "esports":
-                // TODO: Implement esports adapter
-                return [];
+                const esportsGames = await getEsportsGames(apiKey);
+                return esportsGames || [];
             default:
                 return [];
         }
@@ -30,9 +31,9 @@ export const sportsService: SportsService = {
             case "basketball":
                 return await getBasketballResult(apiKey, gameId);
             case "soccer":
-                return undefined;
+                return await getSoccerResult(apiKey, gameId);
             case "esports":
-                return undefined;
+                return await getEsportsResult(apiKey, gameId);
             default:
                 return undefined;
         }

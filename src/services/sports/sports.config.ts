@@ -10,16 +10,14 @@ export interface Sport {
     key: SportKey;
     label: string;
     icon: string;
-    apiBase: string;
     leagues: League[];
 }
 
 export const SPORTS: Sport[] = [
     {
         key: "basketball",
-        label: "Basquete",
+        label: "Basketball",
         icon: "🏀",
-        apiBase: "https://api.balldontlie.io/v1",
         leagues: [ {
             id: "nba",
             name: "NBA",
@@ -30,15 +28,14 @@ export const SPORTS: Sport[] = [
         key: "esports",
         label: "E-Sports",
         icon: "🎮",
-        apiBase: "https://esports.balldontlie.io/api/v1",
         leagues: [ 
             {
-                id: "cs2-majors",
+                id: "cs",
                 name: "CS2 Majors",
                 country: "Global"
             },
             {
-                id: "lol-worlds",
+                id: "lol",
                 name: "LoL World Championship",
                 country: "Global"
             }            
@@ -46,13 +43,12 @@ export const SPORTS: Sport[] = [
     },
     {
         key: "soccer",
-        label: "Futebol",
+        label: "Soccer",
         icon: "⚽",
-        apiBase: "https://soccer.balldontlie.io/api/v1",
         leagues: [ {
-            id: "brasileirao",
-            name: "Brasileirão",
-            country: "Brazil"
+            id: "ucl",
+            name: "Champions League",
+            country: "Europe"
         }]
     },   
 ];
